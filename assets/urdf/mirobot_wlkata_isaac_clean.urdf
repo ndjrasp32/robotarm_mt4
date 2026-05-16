@@ -1,0 +1,228 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot name="complex_mobile_robot_description">
+  <link name="base_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.00938232600839565 0.000624328748425956 0.0357758355368295" />
+      <mass value="0.195389510204647" />
+      <inertia ixx="0.000166643052349761" ixy="-3.01996713550338E-07" ixz="-3.75102833984639E-07" iyy="0.000165933116213424" iyz="1.52869493199902E-07" izz="0.000307708882200721" />
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <geometry>
+        <mesh filename="/home/spark-robotics/work/robotarm/mt4_ws/src/complex_mobile_robot_description/meshes/base_link.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <geometry>
+        <mesh filename="/home/spark-robotics/work/robotarm/mt4_ws/src/complex_mobile_robot_description/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="link_1">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.00974425911684922 -8.50430131924982E-05 0.00292445484186198" />
+      <mass value="0.314718022292889" />
+      <inertia ixx="9.66007768911896E-05" ixy="-7.74506575926684E-07" ixz="-1.02260701737114E-05" iyy="0.000168378425630172" iyz="-1.01729099152555E-07" izz="0.000155625916179113" />
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <geometry>
+        <mesh filename="/home/spark-robotics/work/robotarm/mt4_ws/src/complex_mobile_robot_description/meshes/link_1.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <geometry>
+        <mesh filename="/home/spark-robotics/work/robotarm/mt4_ws/src/complex_mobile_robot_description/meshes/link_1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="joint_1" type="revolute">
+    <origin rpy="0 0 3.1416" xyz="0.02 0 0.093" />
+    <parent link="base_link" />
+    <child link="link_1" />
+    <axis xyz="0 0 1" />
+    <limit effort="10" lower="-1.57" upper="1.57" velocity="10" />
+  </joint>
+  <link name="link_1_child_1">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.0112232839278083 0.0249388667613443 0.0380603891755195" />
+      <mass value="0.0905576964952735" />
+      <inertia ixx="0.000108307372127681" ixy="1.71144433390256E-06" ixz="3.14959213543521E-05" iyy="0.000124421193606778" iyz="-4.9963412787341E-06" izz="2.43577554479539E-05" />
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <geometry>
+        <mesh filename="/home/spark-robotics/work/robotarm/mt4_ws/src/complex_mobile_robot_description/meshes/link_1_child_1.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <geometry>
+        <mesh filename="/home/spark-robotics/work/robotarm/mt4_ws/src/complex_mobile_robot_description/meshes/link_1_child_1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="joint_2_1" type="revolute">
+    <origin rpy="0 0 0" xyz="0.046356 -0.032194 0.042" />
+    <parent link="link_1" />
+    <child link="link_1_child_1" />
+    <axis xyz="0.010962 -0.99994 0" />
+    <limit effort="10" lower="-1" upper="1.57" velocity="10" />
+  </joint>
+  <link name="link_2">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.000492359453363442 0.00859714318572755 0.00844922762246136" />
+      <mass value="0.0106086488736681" />
+      <inertia ixx="1.00461363661119E-06" ixy="-5.86234172012773E-08" ixz="-1.59307139777044E-07" iyy="2.80048611692955E-06" iyz="1.62020419518747E-07" izz="2.09834464549456E-06" />
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <geometry>
+        <mesh filename="/home/spark-robotics/work/robotarm/mt4_ws/src/complex_mobile_robot_description/meshes/link_2.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <geometry>
+        <mesh filename="/home/spark-robotics/work/robotarm/mt4_ws/src/complex_mobile_robot_description/meshes/link_2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="joint_3" type="revolute">
+    <origin rpy="0 0 0" xyz="-0.041099 -0.00080269 0.12333" />
+    <parent link="link_1_child_1" />
+    <child link="link_2" />
+    <axis xyz="0 1 0" />
+    <limit effort="10" lower="0" upper="1.57" velocity="10" />
+  </joint>
+  <link name="link_3">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.0408033498981598 0.031488127225915 -0.0122682575654978" />
+      <mass value="0.0738466437017481" />
+      <inertia ixx="3.32786600564334E-05" ixy="-2.44505376731145E-06" ixz="3.01835344370614E-05" iyy="0.000174984487805883" iyz="4.39374781755278E-07" izz="0.000143574869042808" />
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <geometry>
+        <mesh filename="/home/spark-robotics/work/robotarm/mt4_ws/src/complex_mobile_robot_description/meshes/link_3.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <geometry>
+        <mesh filename="/home/spark-robotics/work/robotarm/mt4_ws/src/complex_mobile_robot_description/meshes/link_3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="joint_4" type="revolute">
+    <origin rpy="0 0 0" xyz="0 0 0" />
+    <parent link="link_2" />
+    <child link="link_3" />
+    <axis xyz="0 1 0" />
+    <limit effort="10" lower="0" upper="1.57" velocity="10" />
+  </joint>
+  <link name="link_4">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.0301077238226291 0.0173195185225134 -0.00124835099805701" />
+      <mass value="0.0377001046131329" />
+      <inertia ixx="7.35213760041767E-06" ixy="3.99837421078378E-08" ixz="7.67043351482174E-07" iyy="8.20051363706612E-06" iyz="5.74535973173986E-07" izz="1.27010076959865E-05" />
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <geometry>
+        <mesh filename="/home/spark-robotics/work/robotarm/mt4_ws/src/complex_mobile_robot_description/meshes/link_4.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <geometry>
+        <mesh filename="/home/spark-robotics/work/robotarm/mt4_ws/src/complex_mobile_robot_description/meshes/link_4.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="joint_l4" type="revolute">
+    <origin rpy="0 0 0" xyz="0.14742 0.015617 -0.026827" />
+    <parent link="link_3" />
+    <child link="link_4" />
+    <axis xyz="0 1 0" />
+    <limit effort="10" lower="0" upper="1.57" velocity="10" />
+  </joint>
+  <link name="gripper_body">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.000190015831215279 -1.94233907663843E-05 -0.0264672842985261" />
+      <mass value="0.0126412904157508" />
+      <inertia ixx="1.77550987819244E-06" ixy="4.63240071453961E-08" ixz="-3.29466445226167E-14" iyy="1.32625148951538E-06" iyz="-1.48895108862368E-13" izz="1.04288966382723E-06" />
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <geometry>
+        <mesh filename="/home/spark-robotics/work/robotarm/mt4_ws/src/complex_mobile_robot_description/meshes/gripper_body.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <geometry>
+        <mesh filename="/home/spark-robotics/work/robotarm/mt4_ws/src/complex_mobile_robot_description/meshes/gripper_body.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="gripper_body_joint" type="revolute">
+    <origin rpy="0 0 0" xyz="0.0348 0.018483 -0.019831" />
+    <parent link="link_4" />
+    <child link="gripper_body" />
+    <axis xyz="0 0 1" />
+    <limit effort="10" lower="-1.57" upper="1.57" velocity="10" />
+  </joint>
+  <link name="link_1_child_2">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.0241566740990428 0.0053139084167288 0.060483815762895" />
+      <mass value="0.00776757190609722" />
+      <inertia ixx="1.1105849643471E-05" ixy="-1.58565346702793E-08" ixz="3.64052409500658E-06" iyy="1.24688711256483E-05" iyz="3.96074613760702E-08" izz="1.39576424864874E-06" />
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <geometry>
+        <mesh filename="/home/spark-robotics/work/robotarm/mt4_ws/src/complex_mobile_robot_description/meshes/link_1_child_2.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <geometry>
+        <mesh filename="/home/spark-robotics/work/robotarm/mt4_ws/src/complex_mobile_robot_description/meshes/link_1_child_2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="joint_2_2" type="revolute">
+    <origin rpy="0 0 0" xyz="0.018195 -0.040903 0.057023" />
+    <parent link="link_1" />
+    <child link="link_1_child_2" />
+    <axis xyz="0.010962 -0.99994 0" />
+    <limit effort="10" lower="-1" upper="1.57" velocity="10" />
+  </joint>
+</robot>
