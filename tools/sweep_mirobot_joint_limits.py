@@ -32,24 +32,33 @@ import mirobot_reach_direct  # noqa: F401
 from isaaclab_tasks.utils.parse_cfg import parse_env_cfg
 
 
+def write_pose(unwrapped, action_joint_pos: torch.Tensor):
+    sim_joint_pos = unwrapped._action_to_sim_joint_pos(action_joint_pos)
+    joint_pos = unwrapped.robot.data.joint_pos.clone()
+    joint_vel = torch.zeros_like(unwrapped.robot.data.joint_vel)
+    joint_pos[:, unwrapped.sim_joint_ids] = sim_joint_pos
+
+    unwrapped.action_joint_targets[:] = action_joint_pos
+    unwrapped.sim_joint_targets[:] = sim_joint_pos
+    unwrapped.robot.write_joint_state_to_sim(joint_pos, joint_vel)
+    unwrapped.robot.set_joint_position_target(sim_joint_pos, joint_ids=unwrapped.sim_joint_ids)
+    unwrapped.scene.write_data_to_sim()
+    unwrapped.sim.step(render=True)
+    unwrapped.scene.update(dt=unwrapped.physics_dt)
+
+
 def run_for(env, unwrapped, duration: float, target: torch.Tensor):
-    actions = torch.zeros((unwrapped.num_envs, unwrapped.cfg.action_space), device=unwrapped.device)
     start = time.time()
     while simulation_app.is_running() and time.time() - start < duration:
-        unwrapped.action_joint_targets[:] = target
-        unwrapped.sim_joint_targets[:] = unwrapped._action_to_sim_joint_pos(target)
-        env.step(actions)
+        write_pose(unwrapped, target)
 
 
 def interpolate_and_run(env, unwrapped, start: torch.Tensor, end: torch.Tensor, duration: float):
-    actions = torch.zeros((unwrapped.num_envs, unwrapped.cfg.action_space), device=unwrapped.device)
     start_time = time.time()
     while simulation_app.is_running() and time.time() - start_time < duration:
         alpha = min(max((time.time() - start_time) / max(duration, 1.0e-6), 0.0), 1.0)
         target = (1.0 - alpha) * start + alpha * end
-        unwrapped.action_joint_targets[:] = target
-        unwrapped.sim_joint_targets[:] = unwrapped._action_to_sim_joint_pos(target)
-        env.step(actions)
+        write_pose(unwrapped, target)
 
 
 def main() -> int:
@@ -64,18 +73,19 @@ def main() -> int:
     env.reset()
 
     unwrapped = env.unwrapped
+    unwrapped.sim.set_camera_view(eye=[0.48, -0.74, 0.48], target=[0.02, 0.0, 0.17])
     home = unwrapped.action_home_joint_pos.repeat(unwrapped.num_envs, 1)
     lower = unwrapped.action_joint_lower.repeat(unwrapped.num_envs, 1)
     upper = unwrapped.action_joint_upper.repeat(unwrapped.num_envs, 1)
 
-    print("[INFO] Mirobot joint limit sweep is running.")
+    print("[INFO] Mirobot joint limit sweep is running.", flush=True)
     if args.mode == "upper":
-        print("[INFO] Watch the GUI. Each policy joint moves home -> upper(max) -> home.")
+        print("[INFO] Watch the GUI. Each policy joint moves home -> upper(max) -> home.", flush=True)
     else:
-        print("[INFO] Watch the GUI. Each policy joint moves lower -> upper -> home.")
-    print("[INFO] policy joints:", unwrapped.action_joint_names)
+        print("[INFO] Watch the GUI. Each policy joint moves lower -> upper -> home.", flush=True)
+    print("[INFO] policy joints:", unwrapped.action_joint_names, flush=True)
     for name, lo, hi in zip(unwrapped.action_joint_names, unwrapped.action_joint_lower, unwrapped.action_joint_upper):
-        print(f"[INFO] {name}: lower={float(lo): .3f} rad upper={float(hi): .3f} rad")
+        print(f"[INFO] {name}: lower={float(lo): .3f} rad upper={float(hi): .3f} rad", flush=True)
 
     run_for(env, unwrapped, args.settle_time, home)
 
@@ -87,18 +97,18 @@ def main() -> int:
         if args.mode == "full":
             low_target = home.clone()
             low_target[:, joint_index] = lower[:, joint_index]
-            print(f"[SWEEP] {joint_name}: home -> lower")
+            print(f"[SWEEP] {joint_name}: home -> lower", flush=True)
             interpolate_and_run(env, unwrapped, current, low_target, args.move_time)
             run_for(env, unwrapped, args.hold_time, low_target)
 
-            print(f"[SWEEP] {joint_name}: lower -> upper")
+            print(f"[SWEEP] {joint_name}: lower -> upper(max)", flush=True)
             interpolate_and_run(env, unwrapped, low_target, high_target, args.move_time)
         else:
-            print(f"[SWEEP] {joint_name}: home -> upper(max)")
+            print(f"[SWEEP] {joint_name}: home -> upper(max)", flush=True)
             interpolate_and_run(env, unwrapped, current, high_target, args.move_time)
         run_for(env, unwrapped, args.hold_time, high_target)
 
-        print(f"[SWEEP] {joint_name}: upper -> home")
+        print(f"[SWEEP] {joint_name}: upper(max) -> home", flush=True)
         interpolate_and_run(env, unwrapped, high_target, home, args.move_time)
         run_for(env, unwrapped, args.hold_time, home)
         current = home.clone()
