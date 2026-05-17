@@ -20,6 +20,8 @@
 ```bash
 ./scripts/inspect_mirobot_asset.sh
 ./scripts/check_mirobot_joint_limits.sh
+./scripts/sweep_mirobot_joint_limits_gui.sh
+./scripts/sweep_mirobot_joint_limits_gui.sh --mode upper
 ./scripts/train_mirobot_visual_16_300.sh
 ./scripts/train_mirobot_reach_128_1000.sh
 ./scripts/plot_and_select_mirobot_best.sh
