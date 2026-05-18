@@ -27,6 +27,8 @@
 ```bash
 ./scripts/inspect_mirobot_asset.sh
 ./scripts/check_mirobot_joint_limits.sh
+./scripts/show_mt4_hardware_mapping_gui.sh
+./scripts/show_mt4_hardware_mapping_gui.sh --profile workspace
 ./scripts/sweep_mirobot_joint_limits_gui.sh
 ./scripts/sweep_mirobot_joint_limits_gui.sh --mode upper
 ./scripts/train_mirobot_visual_16_300.sh
