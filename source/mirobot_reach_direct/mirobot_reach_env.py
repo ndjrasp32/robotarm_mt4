@@ -6,7 +6,7 @@ import torch
 
 import isaaclab.sim as sim_utils
 from isaaclab.actuators import ImplicitActuatorCfg
-from isaaclab.assets import Articulation, ArticulationCfg
+from isaaclab.assets import Articulation, ArticulationCfg, RigidObject, RigidObjectCfg
 from isaaclab.envs import DirectRLEnv, DirectRLEnvCfg
 from isaaclab.markers import VisualizationMarkers, VisualizationMarkersCfg
 from isaaclab.scene import InteractiveSceneCfg
@@ -52,6 +52,11 @@ class MirobotReachPregraspEnvCfg(DirectRLEnvCfg):
         spawn=sim_utils.UsdFileCfg(
             usd_path=MIROBOT_USD_PATH,
             activate_contact_sensors=False,
+            collision_props=sim_utils.CollisionPropertiesCfg(
+                collision_enabled=True,
+                contact_offset=0.004,
+                rest_offset=0.0,
+            ),
             rigid_props=sim_utils.RigidBodyPropertiesCfg(
                 disable_gravity=False,
                 max_depenetration_velocity=5.0,
@@ -93,27 +98,59 @@ class MirobotReachPregraspEnvCfg(DirectRLEnvCfg):
         },
     )
 
-    target_marker_cfg = VisualizationMarkersCfg(
-        prim_path="/Visuals/MirobotReachTargets",
-        markers={
-            "target": sim_utils.SphereCfg(
-                radius=0.022,
-                visual_material=sim_utils.PreviewSurfaceCfg(
-                    diffuse_color=(1.0, 0.05, 0.05),
-                    emissive_color=(0.20, 0.0, 0.0),
-                ),
+    target_cube_cfg: RigidObjectCfg = RigidObjectCfg(
+        prim_path="/World/envs/env_.*/TargetCube",
+        spawn=sim_utils.CuboidCfg(
+            size=(0.044, 0.044, 0.044),
+            rigid_props=sim_utils.RigidBodyPropertiesCfg(
+                disable_gravity=True,
+                solver_position_iteration_count=16,
+                solver_velocity_iteration_count=2,
+                max_depenetration_velocity=2.0,
+                linear_damping=0.15,
+                angular_damping=0.15,
             ),
-        },
+            collision_props=sim_utils.CollisionPropertiesCfg(
+                collision_enabled=True,
+                contact_offset=0.004,
+                rest_offset=0.0,
+            ),
+            mass_props=sim_utils.MassPropertiesCfg(mass=0.05),
+            physics_material=sim_utils.RigidBodyMaterialCfg(
+                static_friction=0.8,
+                dynamic_friction=0.6,
+                restitution=0.05,
+            ),
+            visual_material=sim_utils.PreviewSurfaceCfg(
+                diffuse_color=(1.0, 0.05, 0.05),
+                emissive_color=(0.12, 0.0, 0.0),
+            ),
+        ),
+        init_state=RigidObjectCfg.InitialStateCfg(pos=(0.22, 0.0, 0.12), rot=(1.0, 0.0, 0.0, 0.0)),
     )
 
     pregrasp_marker_cfg = VisualizationMarkersCfg(
         prim_path="/Visuals/MirobotPregraspTargets",
         markers={
             "pregrasp": sim_utils.SphereCfg(
-                radius=0.012,
+                radius=0.095,
                 visual_material=sim_utils.PreviewSurfaceCfg(
                     diffuse_color=(0.05, 0.25, 1.0),
-                    emissive_color=(0.0, 0.05, 0.35),
+                    emissive_color=(0.0, 0.03, 0.20),
+                    opacity=0.28,
+                ),
+            ),
+        },
+    )
+
+    pregrasp_center_marker_cfg = VisualizationMarkersCfg(
+        prim_path="/Visuals/MirobotPregraspCenters",
+        markers={
+            "pregrasp_center": sim_utils.SphereCfg(
+                radius=0.012,
+                visual_material=sim_utils.PreviewSurfaceCfg(
+                    diffuse_color=(0.0, 0.85, 1.0),
+                    emissive_color=(0.0, 0.10, 0.35),
                 ),
             ),
         },
@@ -144,7 +181,7 @@ class MirobotReachPregraspEnvCfg(DirectRLEnvCfg):
     ee_body_name = "gripper_body"
     gripper_center_offset_b = (0.055, 0.0, 0.0)
     gripper_forward_axis_b = (1.0, 0.0, 0.0)
-    target_radius = 0.022
+    target_radius = 0.038
     min_robot_target_clearance = 0.040
 
     pregrasp_horizontal_offset = 0.070
@@ -156,7 +193,7 @@ class MirobotReachPregraspEnvCfg(DirectRLEnvCfg):
     pregrasp_weight = 8.0
     pregrasp_entry_weight = 2.5
     target_weight = 1.5
-    contact_penalty_weight = 80.0
+    contact_penalty_weight = 0.0
     action_penalty_weight = 0.012
     joint_velocity_penalty_weight = 0.0004
     time_penalty_weight = 0.003
@@ -210,8 +247,8 @@ class MirobotReachPregraspEnv(DirectRLEnv):
         self.alignment = torch.zeros((self.num_envs,), device=self.device)
         self.target_contact_penalty = torch.zeros((self.num_envs,), device=self.device)
 
-        self.target_markers = VisualizationMarkers(self.cfg.target_marker_cfg)
-        self.pregrasp_markers = VisualizationMarkers(self.cfg.pregrasp_marker_cfg)
+        self.pregrasp_zone_markers = VisualizationMarkers(self.cfg.pregrasp_marker_cfg)
+        self.pregrasp_center_markers = VisualizationMarkers(self.cfg.pregrasp_center_marker_cfg)
         self.success_markers = VisualizationMarkers(self.cfg.success_marker_cfg)
 
         self._sample_targets(torch.arange(self.num_envs, device=self.device))
@@ -219,6 +256,8 @@ class MirobotReachPregraspEnv(DirectRLEnv):
     def _setup_scene(self):
         self.robot = Articulation(self.cfg.robot_cfg)
         self.scene.articulations["robot"] = self.robot
+        self.target_cube = RigidObject(self.cfg.target_cube_cfg)
+        self.scene.rigid_objects["target_cube"] = self.target_cube
 
         ground_cfg = sim_utils.GroundPlaneCfg()
         ground_cfg.func("/World/defaultGroundPlane", ground_cfg)
@@ -317,6 +356,7 @@ class MirobotReachPregraspEnv(DirectRLEnv):
 
         super()._reset_idx(env_ids)
         self.robot.reset(env_ids)
+        self.target_cube.reset(env_ids)
 
         joint_pos = self.robot.data.default_joint_pos[env_ids].clone()
         joint_vel = self.robot.data.default_joint_vel[env_ids].clone()
@@ -346,8 +386,16 @@ class MirobotReachPregraspEnv(DirectRLEnv):
         self.targets[env_ids, 0] = x
         self.targets[env_ids, 1] = y
         self.targets[env_ids, 2] = z
+        self._write_target_cube_pose(env_ids)
         self._compute_target_geometry(env_ids)
         self._update_target_markers()
+
+    def _write_target_cube_pose(self, env_ids: torch.Tensor):
+        root_state = self.target_cube.data.default_root_state[env_ids].clone()
+        root_state[:, :3] = self.targets[env_ids] + self.scene.env_origins[env_ids]
+        root_state[:, 3:7] = torch.tensor((1.0, 0.0, 0.0, 0.0), device=self.device)
+        root_state[:, 7:] = 0.0
+        self.target_cube.write_root_state_to_sim(root_state, env_ids=env_ids)
 
     def _compute_target_geometry(self, env_ids: torch.Tensor | None = None):
         if env_ids is None:
@@ -374,6 +422,9 @@ class MirobotReachPregraspEnv(DirectRLEnv):
         self.pregrasp_entry_targets[env_ids] = pregrasp_targets - self.cfg.pregrasp_entry_offset * approach_dir
 
     def _compute_intermediate_values(self):
+        self.targets[:] = self.target_cube.data.root_pos_w - self.scene.env_origins
+        self._compute_target_geometry()
+
         ee_pos_w = self.robot.data.body_pos_w[:, self.ee_body_id, :]
         ee_quat_w = self.robot.data.body_quat_w[:, self.ee_body_id, :]
         self.ee_pos = ee_pos_w - self.scene.env_origins
@@ -404,13 +455,13 @@ class MirobotReachPregraspEnv(DirectRLEnv):
         )
 
     def _update_target_markers(self, success: torch.Tensor | None = None):
-        if not hasattr(self, "target_markers"):
+        if not hasattr(self, "pregrasp_zone_markers"):
             return
 
         target_pos_w = self.targets + self.scene.env_origins
         pregrasp_pos_w = self.pregrasp_targets + self.scene.env_origins
-        self.target_markers.visualize(target_pos_w)
-        self.pregrasp_markers.visualize(pregrasp_pos_w)
+        self.pregrasp_zone_markers.visualize(pregrasp_pos_w)
+        self.pregrasp_center_markers.visualize(pregrasp_pos_w)
 
         if success is None:
             success = torch.zeros((self.num_envs,), dtype=torch.bool, device=self.device)
@@ -422,7 +473,6 @@ class MirobotReachPregraspEnv(DirectRLEnv):
         return (
             (self.pregrasp_distance < self.cfg.success_radius)
             & (self.alignment > self.cfg.alignment_success)
-            & (self.target_contact_penalty <= 1e-4)
         )
 
     def _action_to_sim_joint_pos(self, action_joint_pos: torch.Tensor) -> torch.Tensor:
