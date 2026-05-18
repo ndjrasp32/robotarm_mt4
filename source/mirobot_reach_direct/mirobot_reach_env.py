@@ -13,6 +13,15 @@ from isaaclab.scene import InteractiveSceneCfg
 from isaaclab.utils import configclass
 from isaaclab.utils import math as math_utils
 
+from .mt4_hardware_mapping import (
+    ACTION_HOME_JOINT_POS,
+    ACTION_JOINT_LOWER,
+    ACTION_JOINT_NAMES,
+    ACTION_JOINT_UPPER,
+    PASSIVE_HOME_JOINT_POS,
+    SIM_JOINT_NAMES,
+)
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 MIROBOT_USD_PATH = str(PROJECT_ROOT / "assets/usd/mirobot_real/mt4_from_wlkata_isaac_clean.usd")
@@ -23,8 +32,8 @@ class MirobotReachPregraspEnvCfg(DirectRLEnvCfg):
     decimation = 2
     episode_length_s = 5.0
 
-    action_space = 6
-    observation_space = 33
+    action_space = 4
+    observation_space = 29
     state_space = 0
 
     sim: sim_utils.SimulationCfg = sim_utils.SimulationCfg(
@@ -160,24 +169,24 @@ class MirobotReachPregraspEnv(DirectRLEnv):
     def __init__(self, cfg: MirobotReachPregraspEnvCfg, render_mode: str | None = None, **kwargs):
         super().__init__(cfg, render_mode, **kwargs)
 
-        self.action_joint_names = [
-            "joint_1",
-            "joint_2_1",
-            "joint_3",
-            "joint_4",
-            "joint_l4",
-            "gripper_body_joint",
-        ]
-        self.sim_joint_names = [*self.action_joint_names, "joint_2_2"]
+        # MT4 hardware exposes four arm-angle commands (X/Y/Z/A in the SDK).
+        # The CAD URDF contains extra revolute joints for the parallel linkage;
+        # those are driven internally here so the policy cannot learn commands
+        # that do not exist on the real robot.
+        self.action_joint_names = list(ACTION_JOINT_NAMES)
+        self.sim_joint_names = list(SIM_JOINT_NAMES)
         self.action_joint_ids, self.action_joint_names_found = self.robot.find_joints(self.action_joint_names)
         self.sim_joint_ids, self.sim_joint_names_found = self.robot.find_joints(self.sim_joint_names)
         self.ee_body_id = self.robot.find_bodies(self.cfg.ee_body_name)[0][0]
 
-        self.action_joint_lower = torch.tensor([-1.57, -1.00, 0.00, 0.00, 0.00, -1.57], device=self.device)
-        self.action_joint_upper = torch.tensor([1.57, 1.57, 1.57, 1.57, 1.57, 1.57], device=self.device)
-        self.action_home_joint_pos = torch.tensor([0.0, 0.35, 0.75, 0.65, 0.35, 0.0], device=self.device)
+        self.action_joint_lower = torch.tensor(ACTION_JOINT_LOWER, device=self.device)
+        self.action_joint_upper = torch.tensor(ACTION_JOINT_UPPER, device=self.device)
+        self.action_home_joint_pos = torch.tensor(ACTION_HOME_JOINT_POS, device=self.device)
+        self.passive_home_joint_pos = torch.tensor(
+            [PASSIVE_HOME_JOINT_POS["joint_4"], PASSIVE_HOME_JOINT_POS["joint_l4"]], device=self.device
+        )
 
-        self.sim_joint_lower = torch.tensor([-1.57, -1.00, 0.00, 0.00, 0.00, -1.57, -1.00], device=self.device)
+        self.sim_joint_lower = torch.tensor([-1.57, -1.00, -1.00, 0.00, 0.00, 0.00, -1.57], device=self.device)
         self.sim_joint_upper = torch.tensor([1.57, 1.57, 1.57, 1.57, 1.57, 1.57, 1.57], device=self.device)
         self.sim_home_joint_pos = self._action_to_sim_joint_pos(self.action_home_joint_pos.unsqueeze(0))[0]
 
@@ -417,6 +426,11 @@ class MirobotReachPregraspEnv(DirectRLEnv):
         )
 
     def _action_to_sim_joint_pos(self, action_joint_pos: torch.Tensor) -> torch.Tensor:
-        joint_2_2 = action_joint_pos[:, 1:2]
-        return torch.cat([action_joint_pos, joint_2_2], dim=-1)
-
+        joint_1 = action_joint_pos[:, 0:1]
+        joint_2_1 = action_joint_pos[:, 1:2]
+        joint_2_2 = joint_2_1
+        joint_3 = action_joint_pos[:, 2:3]
+        joint_4 = torch.full_like(joint_1, self.passive_home_joint_pos[0])
+        joint_l4 = torch.full_like(joint_1, self.passive_home_joint_pos[1])
+        gripper_body_joint = action_joint_pos[:, 3:4]
+        return torch.cat([joint_1, joint_2_1, joint_2_2, joint_3, joint_4, joint_l4, gripper_body_joint], dim=-1)

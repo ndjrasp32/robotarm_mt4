@@ -15,6 +15,13 @@
 - 학습 로그: `~/work/isaac/src/IsaacLab/logs/rsl_rl/mirobot_reach_pregrasp_direct`
 - plot/checkpoint 선택 결과: `logs/plots`
 
+## 실제 MT4 이식 기준
+
+- 정책 action은 실제 MT4 arm-angle 명령으로 보낼 수 있는 4축만 사용합니다: `joint_1`, `joint_2_1`, `joint_3`, `gripper_body_joint`.
+- 배포 시 매핑은 `X -> joint_1`, `Y -> joint_2_1`, `Z -> joint_3`, `A -> gripper_body_joint`입니다.
+- `joint_2_2`, `joint_4`, `joint_l4`는 URDF/USD에는 남겨두되 정책 action으로 학습하지 않습니다. 현재는 `joint_2_2 = joint_2_1`, `joint_4 = 0.65`, `joint_l4 = 0.35`로 내부 target을 만듭니다.
+- 매핑/주의사항 기록: `notes/20260518_111647_mt4_hardware_transfer_mapping.md`
+
 ## 실행
 
 ```bash

@@ -30,6 +30,7 @@ import gymnasium as gym
 import torch
 
 import mirobot_reach_direct  # noqa: F401
+from mirobot_reach_direct.mt4_hardware_mapping import SDK_ANGLE_FIELDS
 from isaaclab_tasks.utils.parse_cfg import parse_env_cfg
 
 
@@ -112,6 +113,7 @@ def main() -> int:
     action_upper = getattr(unwrapped, "action_joint_upper", torch.empty(0, device=unwrapped.device)).detach().cpu()
     action_joint_names = list(getattr(unwrapped, "action_joint_names", []))
     sim_joint_names = list(getattr(unwrapped, "sim_joint_names", []))
+    sdk_mapping = list(zip(action_joint_names, SDK_ANGLE_FIELDS, strict=False))
 
     rows: list[dict[str, str]] = []
     all_pos_limits_match = True
@@ -207,6 +209,13 @@ def main() -> int:
     lines.append(f"- generated_at: {timestamp} KST")
     lines.append(f"- task: `{args.task}`")
     lines.append(f"- urdf: `{URDF_PATH}`")
+    lines.append(f"- policy_action_joints: `{action_joint_names}`")
+    lines.append(f"- sim_joint_targets: `{sim_joint_names}`")
+    lines.append(
+        "- hardware_sdk_angle_mapping: `"
+        + ", ".join(f"{field}->{joint}" for joint, field in sdk_mapping)
+        + "`"
+    )
     lines.append(f"- all_urdf_position_limits_match_isaac_runtime: `{all_pos_limits_match}`")
     lines.append(f"- all_urdf_velocity_limits_match_isaac_runtime: `{all_velocity_limits_match}`")
     lines.append(f"- all_urdf_effort_limits_match_isaac_runtime: `{all_effort_limits_match}`")
@@ -221,8 +230,15 @@ def main() -> int:
         "`default_joint_pos_limits` and runtime `joint_pos_limits`."
     )
     lines.append(
-        "The current task also has matching action clamp limits for the six policy-controlled joints. "
-        "`joint_2_2` is loaded in simulation and follows `joint_2_1` internally, but is not exposed as a policy action."
+        f"The current task exposes {len(action_joint_names)} hardware-facing policy actions. "
+        "They map to the MT4 SDK arm-angle fields as "
+        + ", ".join(f"`{field}` -> `{joint}`" for joint, field in sdk_mapping)
+        + "."
+    )
+    lines.append(
+        "`joint_2_2`, `joint_4`, and `joint_l4` are loaded and targeted in simulation, "
+        "but are internal linkage joints rather than policy actions. "
+        "`joint_2_2` follows `joint_2_1`; `joint_4` and `joint_l4` currently hold nominal passive-linkage poses."
     )
     lines.append(
         "Velocity limits are also preserved from the URDF in this run. Effort limits are not preserved: "
@@ -262,6 +278,7 @@ def main() -> int:
     lines.append("- `env_match=OK` means policy action clamp matches URDF for policy-controlled joints, or the joint is an internal sim joint.")
     lines.append("- `soft_rad` currently equals runtime limits because `soft_joint_pos_limit_factor` is 1.0.")
     lines.append("- `joint_2_2` is not a policy action. In `MirobotReachPregraspEnv`, its command target is copied from `joint_2_1`.")
+    lines.append("- `joint_4` and `joint_l4` are not policy actions. They are held at nominal passive-linkage poses until the exact MT4 linkage relation is calibrated.")
     lines.append("")
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
