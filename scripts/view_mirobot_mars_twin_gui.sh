@@ -27,5 +27,5 @@ if [[ "${HEADLESS}" == "0" ]] && command -v xdpyinfo >/dev/null 2>&1 && ! xdpyin
   exit 1
 fi
 
-echo "[INFO] Opening MT4 hardware mapping GUI on DISPLAY=${DISPLAY}"
-./isaaclab.sh -p "${PROJECT_DIR}/tools/show_mt4_hardware_mapping_gui.py" "$@"
+echo "[INFO] Opening Mirobot Mars twin GUI on DISPLAY=${DISPLAY}"
+./isaaclab.sh -p "${PROJECT_DIR}/tools/view_mirobot_mars_twin.py" "$@"

@@ -39,3 +39,8 @@ class MirobotReachPPORunnerCfg(RslRlOnPolicyRunnerCfg):
         max_grad_norm=1.0,
     )
 
+
+@configclass
+class MirobotMarsTwinPPORunnerCfg(MirobotReachPPORunnerCfg):
+    experiment_name = "mirobot_mars_twin_direct"
+    max_iterations = 1200

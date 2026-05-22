@@ -4,7 +4,7 @@
 
 - generated_at: 2026-05-17 23:19:43 KST
 - task: `Mirobot-Reach-Pregrasp-Direct-v0`
-- urdf: `/home/spark-robotics/work/robotarm/mirobot_arm_test/assets/urdf/mirobot_wlkata_isaac_clean.urdf`
+- urdf: `/home/spark-robotics/work/robotarm/robotarm_mt4/assets/urdf/mirobot_wlkata_isaac_clean.urdf`
 - all_urdf_position_limits_match_isaac_runtime: `True`
 - all_urdf_velocity_limits_match_isaac_runtime: `True`
 - all_urdf_effort_limits_match_isaac_runtime: `False`

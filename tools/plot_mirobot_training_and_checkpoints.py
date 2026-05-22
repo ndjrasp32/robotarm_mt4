@@ -10,7 +10,7 @@ from tensorboard.backend.event_processing import event_accumulator
 
 
 LOG_ROOT = Path.home() / "work/isaac/src/IsaacLab/logs/rsl_rl/mirobot_reach_pregrasp_direct"
-PROJECT_DIR = Path.home() / "work/robotarm/mirobot_arm_test"
+PROJECT_DIR = Path.home() / "work/robotarm/robotarm_mt4"
 OUT_DIR = PROJECT_DIR / "logs/plots"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 

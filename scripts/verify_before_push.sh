@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PROJECT_DIR="${HOME}/work/robotarm/mirobot_arm_test"
+PROJECT_DIR="${HOME}/work/robotarm/robotarm_mt4"
 ISAACLAB_DIR="${HOME}/work/isaac/src/IsaacLab"
 
 cd "${PROJECT_DIR}"

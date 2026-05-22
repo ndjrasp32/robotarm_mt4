@@ -3,7 +3,7 @@ import csv
 import math
 
 
-PROJECT_DIR = Path.home() / "work/robotarm/mirobot_arm_test"
+PROJECT_DIR = Path.home() / "work/robotarm/robotarm_mt4"
 SUMMARY_PATH = PROJECT_DIR / "logs/plots/mirobot_checkpoint_summary.csv"
 BEST_FILE = PROJECT_DIR / "logs/plots/best_checkpoint.txt"
 

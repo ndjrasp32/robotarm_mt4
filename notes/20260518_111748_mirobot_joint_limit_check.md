@@ -4,7 +4,7 @@
 
 - generated_at: 2026-05-18 11:17:55 KST
 - task: `Mirobot-Reach-Pregrasp-Direct-v0`
-- urdf: `/home/spark-robotics/work/robotarm/mirobot_arm_test/assets/urdf/mirobot_wlkata_isaac_clean.urdf`
+- urdf: `/home/spark-robotics/work/robotarm/robotarm_mt4/assets/urdf/mirobot_wlkata_isaac_clean.urdf`
 - policy_action_joints: `['joint_1', 'joint_2_1', 'joint_3', 'gripper_body_joint']`
 - sim_joint_targets: `['joint_1', 'joint_2_1', 'joint_2_2', 'joint_3', 'joint_4', 'joint_l4', 'gripper_body_joint']`
 - hardware_sdk_angle_mapping: `X->joint_1, Y->joint_2_1, Z->joint_3, A->gripper_body_joint`

@@ -32,7 +32,7 @@ The cube is dynamic and collidable, but gravity is disabled for this intermediat
 Headless environment check:
 
 ```bash
-export PYTHONPATH=/home/spark-robotics/work/robotarm/mirobot_arm_test/source:${PYTHONPATH:-}
+export PYTHONPATH=/home/spark-robotics/work/robotarm/robotarm_mt4/source:${PYTHONPATH:-}
 unset CMEEL_PREFIX
 export TERM=xterm-256color
 /home/spark-robotics/work/isaac/src/IsaacLab/isaaclab.sh -p -c "<env reset and 8 zero-action steps>"
