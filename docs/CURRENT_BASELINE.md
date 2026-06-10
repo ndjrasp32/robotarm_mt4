@@ -40,6 +40,7 @@ Main task IDs:
 - official WLKATA MT4 URDF check reference: `notes/20260518_133328_official_mt4_urdf_check.md`
 - perception baseline reference: `notes/20260608_dual_pi_camera_perception_plan.md`
 - student coordinate curriculum handoff: `notes/20260610_student_coordinate_handoff_and_training_plan.md`
+- latest MT4 coordinate stage0 result: `notes/20260610_mt4_coordinate_stage0_workspace_entry_result.md`
 
 ### 실제 MT4 Perception Baseline
 
@@ -90,6 +91,8 @@ Repeatable training:
 ./scripts/plot_and_select_mirobot_best.sh
 ./scripts/play_mirobot_best.sh
 ```
+
+2026-06-10 Stage 0 coordinate workspace-entry 학습은 task/runtime 포팅 확인에는 성공했지만, `inside_workspace_rate=0.0000`과 `target_three_camera_visible_rate=0.0056`으로 끝났습니다. Stage 1 volume 학습 전에 gripper camera offset, forward axis, workspace-entry 성공 조건, conservative workspace audit을 먼저 수정합니다.
 
 ### Safety Gate
 
@@ -157,6 +160,7 @@ Current hardware-transfer rule:
 - official WLKATA MT4 URDF check reference: `notes/20260518_133328_official_mt4_urdf_check.md`
 - perception baseline reference: `notes/20260608_dual_pi_camera_perception_plan.md`
 - student coordinate curriculum handoff: `notes/20260610_student_coordinate_handoff_and_training_plan.md`
+- latest MT4 coordinate stage0 result: `notes/20260610_mt4_coordinate_stage0_workspace_entry_result.md`
 
 ### Real MT4 Perception Baseline
 
@@ -207,6 +211,8 @@ Repeatable training:
 ./scripts/plot_and_select_mirobot_best.sh
 ./scripts/play_mirobot_best.sh
 ```
+
+The 2026-06-10 Stage 0 coordinate workspace-entry run validated task/runtime porting, but ended with `inside_workspace_rate=0.0000` and `target_three_camera_visible_rate=0.0056`. Before running long Stage 1 volume training, fix the gripper camera offset, forward axis, workspace-entry success condition, and conservative workspace audit.
 
 ### Safety Gate
 
