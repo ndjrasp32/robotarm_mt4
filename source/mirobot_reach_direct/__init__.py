@@ -3,6 +3,13 @@ def _register_isaaclab_tasks() -> None:
 
     from . import agents
     from .mirobot_reach_env import MirobotReachPregraspEnvCfg
+    from .mirobot_coordinate_curriculum_env import (
+        MT4CoordinateCurriculumEnv,
+        MT4CoordinatePlaneEnvCfg,
+        MT4CoordinateVolumeEnvCfg,
+        MT4CoordinateVolumePrecisionEnvCfg,
+        MT4CoordinateWorkspaceEntryEnvCfg,
+    )
     from .mirobot_mars_twin_env import (
         MirobotMarsTwinPickEnvCfg,
         MirobotMarsTwinPlaceEnvCfg,
@@ -20,6 +27,23 @@ def _register_isaaclab_tasks() -> None:
             "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:MirobotReachPPORunnerCfg",
         },
     )
+
+    coordinate_tasks = {
+        "Mirobot-Coordinate-Workspace-Entry-Direct-v0": MT4CoordinateWorkspaceEntryEnvCfg,
+        "Mirobot-Coordinate-Plane-Direct-v0": MT4CoordinatePlaneEnvCfg,
+        "Mirobot-Coordinate-Volume-Direct-v0": MT4CoordinateVolumeEnvCfg,
+        "Mirobot-Coordinate-Volume-Precision-Direct-v0": MT4CoordinateVolumePrecisionEnvCfg,
+    }
+    for task_id, cfg_cls in coordinate_tasks.items():
+        gym.register(
+            id=task_id,
+            entry_point=f"{__name__}.mirobot_coordinate_curriculum_env:MT4CoordinateCurriculumEnv",
+            disable_env_checker=True,
+            kwargs={
+                "env_cfg_entry_point": cfg_cls,
+                "rsl_rl_cfg_entry_point": f"{agents.__name__}.rsl_rl_ppo_cfg:MirobotCoordinatePPORunnerCfg",
+            },
+        )
 
     mars_twin_tasks = {
         "Mirobot-Mars-Twin-Pick-Direct-v0": MirobotMarsTwinPickEnvCfg,
