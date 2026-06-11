@@ -40,7 +40,7 @@ Main task IDs:
 - official WLKATA MT4 URDF check reference: `docs/records/design/20260518_official_mt4_urdf_check.md`
 - perception baseline reference: `docs/records/design/20260608_dual_pi_camera_perception_plan.md`
 - student coordinate curriculum handoff: `docs/records/design/20260610_student_coordinate_handoff_and_training_plan.md`
-- latest MT4 coordinate stage0 result: `docs/records/training/20260610_stage0_workspace_entry_result.md`
+- latest MT4 coordinate Stage 0 result: `docs/records/training/20260611_reach_aware_stage0_entrygate_600iter_analysis.md`
 - MT4 reach-limited 27-cell workspace audit: `docs/records/design/20260611_mt4_reach_limited_workspace_audit.md`
 - latest MT4 coordinate Stage 1 plane result: `docs/records/training/20260611_stage1_plane_xy035_center035_analysis.md`
 
@@ -95,7 +95,7 @@ Repeatable training:
 ./scripts/play_mirobot_best.sh
 ```
 
-2026-06-10 Stage 0 coordinate workspace-entry 학습은 task/runtime 포팅 확인에는 성공했지만, `inside_workspace_rate=0.0000`으로 끝났습니다. 2026-06-11 top-down reach sampling 기준으로 MT4 작업 박스를 `center=(-0.078, 0.000, 0.103)`, `size=(0.045, 0.095, 0.055)`로 다시 잡았습니다. gripper camera는 집게 body 기준 `(+X, 0, -Z)` 45도 방향으로 밖에서 안쪽을 보게 두고, 관측에는 동적 gripper-camera forward 벡터를 포함합니다. 학습 순서는 Stage 0 workspace-entry, Stage 1 3x3 plane, Stage 2 27-cell volume입니다.
+2026-06-10 Stage 0 coordinate workspace-entry 학습은 task/runtime 포팅 확인에는 성공했지만, `inside_workspace_rate=0.0000`으로 끝났습니다. 2026-06-11 top-down reach sampling 기준으로 MT4 작업 박스를 `center=(-0.078, 0.000, 0.103)`, `size=(0.045, 0.095, 0.055)`로 다시 잡았고, 최신 Stage 0은 reach-aware workspace-entry gate 기준으로 기록합니다. gripper camera는 집게 body 기준 `(+X, 0, -Z)` 45도 방향으로 밖에서 안쪽을 보게 두고, 관측에는 동적 gripper-camera forward 벡터를 포함합니다. 학습 순서는 Stage 0 workspace-entry, Stage 1 3x3 plane, Stage 2 27-cell volume입니다.
 
 ### Safety Gate
 
@@ -166,7 +166,7 @@ Current hardware-transfer rule:
 - official WLKATA MT4 URDF check reference: `docs/records/design/20260518_official_mt4_urdf_check.md`
 - perception baseline reference: `docs/records/design/20260608_dual_pi_camera_perception_plan.md`
 - student coordinate curriculum handoff: `docs/records/design/20260610_student_coordinate_handoff_and_training_plan.md`
-- latest MT4 coordinate stage0 result: `docs/records/training/20260610_stage0_workspace_entry_result.md`
+- latest MT4 coordinate Stage 0 result: `docs/records/training/20260611_reach_aware_stage0_entrygate_600iter_analysis.md`
 - MT4 reach-limited 27-cell workspace audit: `docs/records/design/20260611_mt4_reach_limited_workspace_audit.md`
 - latest MT4 coordinate Stage 1 plane result: `docs/records/training/20260611_stage1_plane_xy035_center035_analysis.md`
 
@@ -221,7 +221,7 @@ Repeatable training:
 ./scripts/play_mirobot_best.sh
 ```
 
-The 2026-06-10 Stage 0 coordinate workspace-entry run validated task/runtime porting, but ended with `inside_workspace_rate=0.0000`. The 2026-06-11 top-down reach sampling audit moved the MT4 workspace to `center=(-0.078, 0.000, 0.103)`, `size=(0.045, 0.095, 0.055)`. The gripper camera points along the gripper-body `(+X, 0, -Z)` 45-degree axis from outside toward the gripper/target side, and the observation includes the dynamic gripper-camera forward vector. The order is now Stage 0 workspace-entry, Stage 1 3x3 plane, then Stage 2 27-cell volume.
+The 2026-06-10 Stage 0 coordinate workspace-entry run validated task/runtime porting, but ended with `inside_workspace_rate=0.0000`. The 2026-06-11 top-down reach sampling audit moved the MT4 workspace to `center=(-0.078, 0.000, 0.103)`, `size=(0.045, 0.095, 0.055)`, and the latest Stage 0 baseline is the reach-aware workspace-entry gate run. The gripper camera points along the gripper-body `(+X, 0, -Z)` 45-degree axis from outside toward the gripper/target side, and the observation includes the dynamic gripper-camera forward vector. The order is now Stage 0 workspace-entry, Stage 1 3x3 plane, then Stage 2 27-cell volume.
 
 ### Safety Gate
 
