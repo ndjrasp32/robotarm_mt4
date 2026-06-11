@@ -12,20 +12,21 @@
 
 1. `docs/CURRENT_BASELINE.md`
 2. `README.md`
-3. `notes/`는 기준 문서에 링크된 항목만 필요할 때 확인
+3. `docs/records/README.md`
+4. 세부 근거는 `docs/records/design/` 또는 `docs/records/training/`에서 필요한 항목만 확인
 
-새 노트는 asset, mapping, safety, task 기준이 실제로 바뀐 경우에만 하나 추가합니다. 단순 실행 로그, plot 결과, 임시 확인은 README 기준으로 승격하지 않습니다.
+새 기록은 asset, mapping, safety, task 기준이 실제로 바뀌거나 학습 결과를 남겨야 할 때만 하나 추가합니다. 단순 실행 로그, plot 결과, 임시 확인은 README 기준으로 승격하지 않습니다.
 
 ### 리셋 이유
 
-2026-05-22 기준으로 작업 기준을 리셋했습니다. 이전 상태에서는 날짜별 노트가 늘어났고, 저장소 이름이 `robotarm_student`와 `robotarm_mt4`로 정리되었으며, 학생용 curriculum과 하드웨어 전이 책임이 섞여 있었습니다. 이제 이 저장소는 MT4 asset fidelity, hardware mapping, safe simulation 기준선으로만 봅니다. 오래된 `notes/`는 archive입니다.
+2026-05-22 기준으로 작업 기준을 리셋했습니다. 이전 상태에서는 날짜별 노트가 늘어났고, 저장소 이름이 `robotarm_student`와 `robotarm_mt4`로 정리되었으며, 학생용 curriculum과 하드웨어 전이 책임이 섞여 있었습니다. 이제 이 저장소는 MT4 asset fidelity, hardware mapping, safe simulation 기준선으로만 봅니다. 오래된 기록은 `docs/records/archive/`에 보존합니다.
 
 ### 현재 asset
 
 - 원본 ROS2 xacro: `/home/spark-robotics/work/robotarm/mt4_ws/src/complex_mobile_robot_description/urdf/complex_mobile_robot_description.urdf.xacro`
 - Isaac용 clean URDF 복사본: `assets/urdf/mirobot_wlkata_isaac_clean.urdf`
 - Isaac용 USD 복사본: `assets/usd/mirobot_real/mt4_from_wlkata_isaac_clean.usd`
-- 공식 WLKATA MT4 URDF 기록: `notes/20260518_133328_official_mt4_urdf_check.md`
+- 공식 WLKATA MT4 URDF 기록: `docs/records/design/20260518_official_mt4_urdf_check.md`
 
 ### 첫 task
 
@@ -74,9 +75,9 @@
 - 정책 observation은 단계적으로 전환합니다: 내부 target 좌표 baseline -> 카메라 추정 좌표 -> 필요 시 image feature 포함.
 - 실제 로봇 motion은 아래 safety gate를 통과하기 전까지 실행 기준으로 올리지 않습니다.
 
-참고 설계 기록: `notes/20260608_dual_pi_camera_perception_plan.md`
-student coordinate curriculum handoff: `notes/20260610_student_coordinate_handoff_and_training_plan.md`
-MT4 reach-limited 27-cell workspace audit: `notes/20260611_mt4_reach_limited_workspace_audit.md`
+참고 설계 기록: `docs/records/design/20260608_dual_pi_camera_perception_plan.md`
+student coordinate curriculum handoff: `docs/records/design/20260610_student_coordinate_handoff_and_training_plan.md`
+MT4 reach-limited 27-cell workspace audit: `docs/records/design/20260611_mt4_reach_limited_workspace_audit.md`
 
 ### 실제 MT4 이식 기준
 
@@ -84,7 +85,7 @@ MT4 reach-limited 27-cell workspace audit: `notes/20260611_mt4_reach_limited_wor
 - 배포 시 매핑은 `X -> joint_1`, `Y -> joint_2_1`, `Z -> joint_3`, `A -> gripper_body_joint`입니다.
 - `joint_2_2`, `joint_4`, `joint_l4`는 URDF/USD에는 남겨두되 정책 action으로 학습하지 않습니다.
 - 현재 내부 target은 `joint_2_2 = joint_2_1`, `joint_4 = 0.65`, `joint_l4 = 0.35`입니다.
-- 매핑/주의사항 기록: `notes/20260518_111647_mt4_hardware_transfer_mapping.md`
+- 매핑/주의사항 기록: `docs/records/design/20260518_mt4_hardware_transfer_mapping.md`
 
 ### 실행
 
@@ -134,20 +135,21 @@ Start each day in this order:
 
 1. `docs/CURRENT_BASELINE.md`
 2. `README.md`
-3. Open `notes/` only when the baseline links to a specific entry
+3. `docs/records/README.md`
+4. Open only the needed detailed record under `docs/records/design/` or `docs/records/training/`
 
-Add a new note only when the asset, mapping, safety, or task baseline actually changes. Do not promote routine command output, plot results, or temporary checks into the README baseline.
+Add a new record only when the asset, mapping, safety, or task baseline actually changes, or when a training result needs to be preserved. Do not promote routine command output, plot results, or temporary checks into the README baseline.
 
 ### Reset Rationale
 
-The working baseline was reset on 2026-05-22. The previous state had too many dated notes, the repositories had been renamed into `robotarm_student` and `robotarm_mt4`, and student curriculum work was mixed with hardware-transfer responsibilities. From now on, this repository is the baseline for MT4 asset fidelity, hardware mapping, and safe simulation. Older `notes/` remain archive.
+The working baseline was reset on 2026-05-22. The previous state had too many dated notes, the repositories had been renamed into `robotarm_student` and `robotarm_mt4`, and student curriculum work was mixed with hardware-transfer responsibilities. From now on, this repository is the baseline for MT4 asset fidelity, hardware mapping, and safe simulation. Older records are preserved under `docs/records/archive/`.
 
 ### Current Asset
 
 - source ROS2 xacro: `/home/spark-robotics/work/robotarm/mt4_ws/src/complex_mobile_robot_description/urdf/complex_mobile_robot_description.urdf.xacro`
 - Isaac clean URDF copy: `assets/urdf/mirobot_wlkata_isaac_clean.urdf`
 - Isaac USD copy: `assets/usd/mirobot_real/mt4_from_wlkata_isaac_clean.usd`
-- official WLKATA MT4 URDF record: `notes/20260518_133328_official_mt4_urdf_check.md`
+- official WLKATA MT4 URDF record: `docs/records/design/20260518_official_mt4_urdf_check.md`
 
 ### First Task
 
@@ -196,9 +198,9 @@ Real MT4 device learning and hardware-transfer decisions belong in this reposito
 - Transition policy observations in stages: internal target-coordinate baseline -> camera-estimated target coordinates -> image features if needed.
 - Do not promote real robot motion into the working baseline until the safety gate below is satisfied.
 
-Reference design note: `notes/20260608_dual_pi_camera_perception_plan.md`
-Student coordinate curriculum handoff: `notes/20260610_student_coordinate_handoff_and_training_plan.md`
-MT4 reach-limited 27-cell workspace audit: `notes/20260611_mt4_reach_limited_workspace_audit.md`
+Reference design note: `docs/records/design/20260608_dual_pi_camera_perception_plan.md`
+Student coordinate curriculum handoff: `docs/records/design/20260610_student_coordinate_handoff_and_training_plan.md`
+MT4 reach-limited 27-cell workspace audit: `docs/records/design/20260611_mt4_reach_limited_workspace_audit.md`
 
 ### Real MT4 Transfer Rule
 
@@ -206,7 +208,7 @@ MT4 reach-limited 27-cell workspace audit: `notes/20260611_mt4_reach_limited_wor
 - Deployment mapping is `X -> joint_1`, `Y -> joint_2_1`, `Z -> joint_3`, `A -> gripper_body_joint`.
 - `joint_2_2`, `joint_4`, and `joint_l4` remain in URDF/USD but are not policy actions.
 - Current internal targets are `joint_2_2 = joint_2_1`, `joint_4 = 0.65`, and `joint_l4 = 0.35`.
-- Mapping and caveat record: `notes/20260518_111647_mt4_hardware_transfer_mapping.md`
+- Mapping and caveat record: `docs/records/design/20260518_mt4_hardware_transfer_mapping.md`
 
 ### Commands
 

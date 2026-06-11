@@ -1,21 +1,21 @@
-# 2026-06-11 MT4 Reach-Aware Stage 0 Entry-Gate / 600iter Analysis
+# 2026-06-11 MT4 Stage 0 엔트리 게이트 600iter 분석
 
-## Scope
+## 범위
 
-This run replaces the strict lateral pre-entry latch for Stage 0 with a workspace-entry gate. The lateral and standoff metrics are still logged, but the phase latch now opens when the gripper reaches the conservative workspace boundary within `0.020 m` while the target is visible from the body stereo cameras and the gripper camera.
+이 실행은 Stage 0의 strict lateral pre-entry latch를 workspace-entry gate로 바꾼 결과다. lateral과 standoff 지표는 계속 기록하지만, phase latch는 gripper가 보수적인 workspace boundary의 `0.020 m` 안에 들어오고 body stereo camera와 gripper camera에서 target이 보일 때 열린다.
 
-All execution was IsaacLab simulation only. No real MT4 robot motion was executed.
+모든 실행은 IsaacLab simulation에서만 진행했다. 실제 MT4 로봇 motion은 실행하지 않았다.
 
-## Code / Script Changes
+## 코드/스크립트 변경
 
-| file | change |
+| 파일 | 변경 |
 | --- | --- |
-| `source/mirobot_reach_direct/mirobot_coordinate_curriculum_env.py` | Added `workspace_entry_phase_latch_by_entry`; Stage 0 uses workspace-entry radius plus three-camera visibility for the phase latch instead of the strict lateral/standoff latch. |
-| `scripts/train_mirobot_coordinate_stage0_workspace_entry_128_300.sh` | Updated the default run name to `mt4_reach_aware_stage0_entrygate_128env_600iter` and clarified the success description. |
+| `source/mirobot_reach_direct/mirobot_coordinate_curriculum_env.py` | `workspace_entry_phase_latch_by_entry` 추가. Stage 0 phase latch를 strict lateral/standoff latch 대신 workspace-entry radius와 three-camera visibility 기준으로 변경했다. |
+| `scripts/train_mirobot_coordinate_stage0_workspace_entry_128_300.sh` | 기본 run name을 `mt4_reach_aware_stage0_entrygate_128env_600iter`로 바꾸고 success 설명을 정리했다. |
 
-## Training Run
+## 학습 실행
 
-| item | value |
+| 항목 | 값 |
 | --- | --- |
 | run name | `mt4_reach_aware_stage0_entrygate_128env_600iter` |
 | task | `Mirobot-Coordinate-Workspace-Entry-Direct-v0` |
@@ -26,21 +26,21 @@ All execution was IsaacLab simulation only. No real MT4 robot motion was execute
 | checkpoint used for demo | `model_599.pt` |
 | run dir | `/home/spark-robotics/work/isaac/src/IsaacLab/logs/rsl_rl/mirobot_coordinate_curriculum_direct/2026-06-11_17-14-59_mt4_reach_aware_stage0_entrygate_128env_600iter` |
 
-Command:
+학습 명령:
 
 ```bash
 MT4_MAX_ITERATIONS=600 ./scripts/train_mirobot_coordinate_stage0_workspace_entry_128_300.sh --video --video_length 240 --video_interval 2400
 ```
 
-Demo command:
+데모 명령:
 
 ```bash
 MT4_CHECKPOINT=/home/spark-robotics/work/isaac/src/IsaacLab/logs/rsl_rl/mirobot_coordinate_curriculum_direct/2026-06-11_17-14-59_mt4_reach_aware_stage0_entrygate_128env_600iter/model_599.pt ./scripts/play_mirobot_coordinate_stage0_demo_60s.sh
 ```
 
-## Videos
+## 영상
 
-Training videos copied into the repo:
+저장소에 복사한 학습 영상:
 
 - `training_logs/videos/2026-06-11_17-14-59_mt4_reach_aware_stage0_entrygate_128env_600iter/train/rl-video-step-0.mp4`
 - `training_logs/videos/2026-06-11_17-14-59_mt4_reach_aware_stage0_entrygate_128env_600iter/train/rl-video-step-2400.mp4`
@@ -51,15 +51,15 @@ Training videos copied into the repo:
 - `training_logs/videos/2026-06-11_17-14-59_mt4_reach_aware_stage0_entrygate_128env_600iter/train/rl-video-step-14400.mp4`
 - `training_logs/videos/2026-06-11_17-14-59_mt4_reach_aware_stage0_entrygate_128env_600iter/train/rl-video-step-16800.mp4`
 
-Learned-policy demo:
+학습된 policy 데모:
 
 - `training_logs/videos/2026-06-11_17-14-59_mt4_reach_aware_stage0_entrygate_128env_600iter/play/rl-video-step-0.mp4`
   - duration: `59.983333 s`
   - size: `1,856,697 bytes`
 
-## Final Metrics
+## 최종 지표
 
-| metric | final |
+| 지표 | 최종값 |
 | --- | ---: |
 | `Train/mean_reward` | `19147.40` |
 | `workspace_entry_success_rate` | `0.4839` |
@@ -79,14 +79,14 @@ Learned-policy demo:
 | `fine_center_4cm_rate` | `0.5120` |
 | `near_center_7cm_rate` | `0.9282` |
 
-## Analysis
+## 분석
 
-The entry-gate change fixed the previous hard blocker. The prior 2cm standoff run reached `workspace_entry_radius_rate=0.9177` but kept `approach_phase_latched_rate=0.0000` because the learned lateral error stayed above the strict `0.015 m` latch threshold. In this run, lateral readiness still stayed at `0.0000`, but the new entry gate allowed the phase to latch at `0.9250`.
+entry-gate 변경으로 이전 hard blocker가 풀렸다. 직전 2cm standoff 실행은 `workspace_entry_radius_rate=0.9177`까지 갔지만, 학습된 lateral error가 strict `0.015 m` latch threshold보다 커서 `approach_phase_latched_rate=0.0000`에 머물렀다. 이번 실행에서도 lateral readiness는 `0.0000`이었지만, 새 entry gate 덕분에 phase latch가 `0.9250`까지 열렸다.
 
-Stage 0 now produces real workspace-entry successes: final `workspace_entry_success_rate=0.4839`, `inside_workspace_rate=0.4856`, and `descent/approach_entry_success_rate=0.4839`. The policy is still not precise at the center target (`center_1cm_rate=0.0000`, `fine_center_4cm_rate=0.5120`), so this is a usable Stage 0 entry policy rather than a final targeting policy.
+Stage 0은 이제 실제 workspace-entry 성공을 만든다. 최종 `workspace_entry_success_rate=0.4839`, `inside_workspace_rate=0.4856`, `descent/approach_entry_success_rate=0.4839`다. 다만 center target 정밀도는 아직 부족하다. `center_1cm_rate=0.0000`, `fine_center_4cm_rate=0.5120`이므로 최종 targeting policy가 아니라 Stage 0 entry policy로 보는 게 맞다.
 
-The main remaining weakness is gripper-camera target visibility. `target_three_camera_visible_rate=0.7795` is good enough to train Stage 0, but it is below the workspace-boundary rate of `0.9216`, so some near-entry poses are still lost because the gripper camera does not see the target.
+남은 약점은 gripper-camera target visibility다. `target_three_camera_visible_rate=0.7795`는 Stage 0 학습에는 충분하지만 workspace-boundary rate `0.9216`보다 낮다. 즉 workspace 근처까지 간 일부 pose가 gripper camera에서 target을 못 봐서 손실된다.
 
-## Recommendation
+## 다음 판단
 
-Stage 0 is now good enough to move to the next curriculum pass. Keep the entry-gate latch for Stage 0, and start the next Stage 1 plane-localization run from this policy only if the Stage 1 task can tolerate a roughly 50 percent initial workspace-entry success rate. If Stage 1 fails to bootstrap, the next Stage 0 improvement should increase gripper-camera visibility reward rather than tightening the lateral latch again.
+Stage 0은 다음 curriculum pass를 시도할 만큼 좋아졌다. Stage 0에는 entry-gate latch를 유지한다. Stage 1 plane-localization은 약 50% 초기 workspace-entry success rate를 감수할 수 있을 때 이 policy에서 시작한다. Stage 1 bootstrap이 실패하면 lateral latch를 다시 조이기보다 gripper-camera visibility reward를 먼저 강화한다.

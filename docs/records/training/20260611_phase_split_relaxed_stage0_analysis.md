@@ -1,6 +1,6 @@
-# 2026-06-11 MT4 Phase-Split Relaxed Stage 0 Analysis
+# 2026-06-11 MT4 Stage 0 phase-split 완화 분석
 
-## Goal
+## 목적
 
 Previous Stage 0 phase-split training learned x/y alignment but failed the top-down z gate.
 This run relaxes the top-down setup before attempting Stage 1:
@@ -10,7 +10,7 @@ This run relaxes the top-down setup before attempting Stage 1:
 3. Move the top-down staging z from exact workspace max to `workspace_center.z + 0.015 m`.
 4. Record training videos for visual inspection.
 
-## Code Change
+## 코드 변경
 
 - Environment: `source/mirobot_reach_direct/mirobot_coordinate_curriculum_env.py`
 - `top_down_height_success_radius`: `0.012 -> 0.030`
@@ -23,7 +23,7 @@ For the current reach-limited MT4 workspace:
 - workspace max z: `0.1305 m`
 - relaxed staging z: `0.118 m`
 
-## Training Run
+## 학습 실행
 
 | item | value |
 | --- | --- |
@@ -43,7 +43,7 @@ Videos:
 - `/home/spark-robotics/work/isaac/src/IsaacLab/logs/rsl_rl/mirobot_coordinate_curriculum_direct/2026-06-11_14-45-39_mt4_phase_split_relaxed_stage0_128env_300iter_video/videos/train/rl-video-step-4800.mp4`
 - `/home/spark-robotics/work/isaac/src/IsaacLab/logs/rsl_rl/mirobot_coordinate_curriculum_direct/2026-06-11_14-45-39_mt4_phase_split_relaxed_stage0_128env_300iter_video/videos/train/rl-video-step-7200.mp4`
 
-## Final Scalars
+## 최종 지표
 
 | metric | first | final | best |
 | --- | ---: | ---: | ---: |
@@ -67,7 +67,7 @@ Videos:
 | `center_3cm_rate` | 0.0000 | 0.0000 | 0.0100 |
 | `center_1cm_rate` | 0.0000 | 0.0000 | 0.0000 |
 
-## Phase Result
+## 단계 결과
 
 | phase | success criterion | final rate | status |
 | --- | --- | ---: | --- |
@@ -78,7 +78,7 @@ Videos:
 | Stage 1 / 3x3 plane | Stage 0 gate must pass first | not run | held |
 | Stage 2 / 3x3x3 volume | Stage 1 must pass first | not run | held |
 
-## Interpretation
+## 해석
 
 The relaxed run improved the parts we wanted to preserve:
 
@@ -89,7 +89,7 @@ The relaxed run improved the parts we wanted to preserve:
 
 The blocker is still the z gate. Even after lowering the staging height and widening the tolerance to 3 cm, mean top-down z error settled around 6 cm and the final `top_down_height_ready_rate` stayed 0. Because the latch requires x/y and z to be ready at the same time, Phase 1 remained blocked.
 
-## Next Adjustment
+## 다음 조정
 
 Do not start Stage 1 yet.
 

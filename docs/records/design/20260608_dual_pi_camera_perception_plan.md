@@ -1,4 +1,4 @@
-# 2026-06-08 Dual Pi Camera Perception Plan
+# 2026-06-08 MT4 dual Pi camera perception 계획
 
 ## 배경
 

@@ -1,6 +1,6 @@
-# Current Baseline - robotarm_mt4
+# 현재 기준 - robotarm_mt4
 
-Date: 2026-05-22 KST
+Date: 2026-06-11 KST
 
 ## 한국어
 
@@ -35,13 +35,13 @@ Main task IDs:
 현재 hardware-transfer rule:
 
 - policy action은 네 개의 MT4 command-facing joint로 제한합니다.
-- mapping reference: `notes/20260518_111647_mt4_hardware_transfer_mapping.md`
-- dynamic object contact reference: `notes/20260518_134455_dynamic_cube_target.md`
-- official WLKATA MT4 URDF check reference: `notes/20260518_133328_official_mt4_urdf_check.md`
-- perception baseline reference: `notes/20260608_dual_pi_camera_perception_plan.md`
-- student coordinate curriculum handoff: `notes/20260610_student_coordinate_handoff_and_training_plan.md`
-- latest MT4 coordinate stage0 result: `notes/20260610_mt4_coordinate_stage0_workspace_entry_result.md`
-- MT4 reach-limited 27-cell workspace audit: `notes/20260611_mt4_reach_limited_workspace_audit.md`
+- mapping reference: `docs/records/design/20260518_mt4_hardware_transfer_mapping.md`
+- dynamic object contact reference: `docs/records/design/20260518_dynamic_cube_target.md`
+- official WLKATA MT4 URDF check reference: `docs/records/design/20260518_official_mt4_urdf_check.md`
+- perception baseline reference: `docs/records/design/20260608_dual_pi_camera_perception_plan.md`
+- student coordinate curriculum handoff: `docs/records/design/20260610_student_coordinate_handoff_and_training_plan.md`
+- latest MT4 coordinate stage0 result: `docs/records/training/20260610_stage0_workspace_entry_result.md`
+- MT4 reach-limited 27-cell workspace audit: `docs/records/design/20260611_mt4_reach_limited_workspace_audit.md`
 
 ### 실제 MT4 Perception Baseline
 
@@ -63,7 +63,7 @@ Main task IDs:
 
 ### 리셋 이유
 
-2026-05-22 기준으로 baseline을 리셋했습니다. 이전 작업 상태는 날짜별 노트가 너무 많고, 저장소 이름이 바뀌었으며, 학생용 curriculum과 하드웨어 전이 책임이 섞여 있었습니다. 이제 이 저장소는 Mirobot/MT4 asset과 hardware-transfer baseline입니다. 이전 `notes/` 항목은 daily source of truth가 아니라 archive입니다.
+2026-05-22 기준으로 baseline을 리셋했습니다. 이전 작업 상태는 날짜별 노트가 너무 많고, 저장소 이름이 바뀌었으며, 학생용 curriculum과 하드웨어 전이 책임이 섞여 있었습니다. 이제 이 저장소는 Mirobot/MT4 asset과 hardware-transfer baseline입니다. 이전 기록은 daily source of truth가 아니라 `docs/records/archive/` 보관 기록입니다.
 
 ### 실제 시작 순서
 
@@ -109,9 +109,12 @@ Repeatable training:
 
 ### 문서 운영 규칙
 
-- 기존 `notes/`는 historical archive입니다.
+- 문서 인덱스와 기록 양식은 `docs/records/README.md`를 따른다.
+- 기준 설계 기록은 `docs/records/design/`에 둔다.
+- 학습 결과와 분석 기록은 `docs/records/training/`에 둔다.
+- 현재 기준에 직접 쓰지 않는 과거 기록은 `docs/records/archive/`에 둔다.
 - routine command output은 새 노트로 만들지 않습니다.
-- 새 관찰은 dated note로 남기되, MT4 asset, mapping, safety, task baseline이 바뀔 때만 이 파일을 갱신합니다.
+- 새 관찰은 dated record로 남기되, MT4 asset, mapping, safety, task baseline이 바뀔 때만 이 파일을 갱신합니다.
 - 오늘 기준 판단은 `README.md`와 이 파일만으로 끝나야 합니다.
 
 ### 다음 작업
@@ -157,13 +160,13 @@ Main task IDs:
 Current hardware-transfer rule:
 
 - policy actions are limited to four MT4 command-facing joints
-- mapping reference: `notes/20260518_111647_mt4_hardware_transfer_mapping.md`
-- dynamic object contact reference: `notes/20260518_134455_dynamic_cube_target.md`
-- official WLKATA MT4 URDF check reference: `notes/20260518_133328_official_mt4_urdf_check.md`
-- perception baseline reference: `notes/20260608_dual_pi_camera_perception_plan.md`
-- student coordinate curriculum handoff: `notes/20260610_student_coordinate_handoff_and_training_plan.md`
-- latest MT4 coordinate stage0 result: `notes/20260610_mt4_coordinate_stage0_workspace_entry_result.md`
-- MT4 reach-limited 27-cell workspace audit: `notes/20260611_mt4_reach_limited_workspace_audit.md`
+- mapping reference: `docs/records/design/20260518_mt4_hardware_transfer_mapping.md`
+- dynamic object contact reference: `docs/records/design/20260518_dynamic_cube_target.md`
+- official WLKATA MT4 URDF check reference: `docs/records/design/20260518_official_mt4_urdf_check.md`
+- perception baseline reference: `docs/records/design/20260608_dual_pi_camera_perception_plan.md`
+- student coordinate curriculum handoff: `docs/records/design/20260610_student_coordinate_handoff_and_training_plan.md`
+- latest MT4 coordinate stage0 result: `docs/records/training/20260610_stage0_workspace_entry_result.md`
+- MT4 reach-limited 27-cell workspace audit: `docs/records/design/20260611_mt4_reach_limited_workspace_audit.md`
 
 ### Real MT4 Perception Baseline
 
@@ -185,7 +188,7 @@ Learning transition:
 
 ### Reset Rationale
 
-The baseline was reset on 2026-05-22 because the previous working state had too many dated notes, the repositories had been renamed, and student curriculum responsibilities were mixed with hardware-transfer responsibilities. From now on, this repository is the Mirobot/MT4 asset and hardware-transfer baseline. Older `notes/` entries remain archive rather than the daily source of truth.
+The baseline was reset on 2026-05-22 because the previous working state had too many dated notes, the repositories had been renamed, and student curriculum responsibilities were mixed with hardware-transfer responsibilities. From now on, this repository is the Mirobot/MT4 asset and hardware-transfer baseline. Older records are preserved under `docs/records/archive/` rather than treated as the daily source of truth.
 
 ### Practical Starting Point
 
@@ -231,9 +234,12 @@ Do not promote real robot motion into the working baseline until these items are
 
 ### Documentation Policy
 
-- Existing `notes/` are historical archive.
+- Follow the record index and format in `docs/records/README.md`.
+- Put baseline design records under `docs/records/design/`.
+- Put training results and analysis under `docs/records/training/`.
+- Put historical records that are not directly used by the current baseline under `docs/records/archive/`.
 - Do not create a new note for routine command output.
-- Record new observations as dated notes, then update this file only when the MT4 asset, mapping, safety, or task baseline changes.
+- Record new observations as dated records, then update this file only when the MT4 asset, mapping, safety, or task baseline changes.
 - Daily baseline decisions should be possible from `README.md` and this file alone.
 
 ### Next Work

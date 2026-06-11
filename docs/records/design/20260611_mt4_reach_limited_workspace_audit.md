@@ -1,10 +1,10 @@
-# 2026-06-11 MT4 Reach-Limited Workspace Audit
+# 2026-06-11 MT4 reach-limited workspace audit
 
-## Purpose
+## 목적
 
 Define the first MT4 coordinate workspace from actual simulated gripper-center reach, not from the wider student asset workspace. This is still IsaacLab simulation only. No real robot motion was executed.
 
-## Reach Sampling Result
+## reach sampling 결과
 
 Headless IsaacLab sampled 65,536 random poses inside the four hardware-facing action joint limits:
 
@@ -21,7 +21,7 @@ Headless IsaacLab sampled 65,536 random poses inside the four hardware-facing ac
 
 The old Stage 1 student workspace `center=(0.305, 0.000, 0.205), size=(0.090, 0.140, 0.090)` is outside this MT4 asset's sampled front reach because sampled `x_max` was about `0.207 m`.
 
-## MT4 Workspace Baseline
+## MT4 workspace 기준
 
 Use this top-down reach-limited workspace for Stage 0 workspace-entry, Stage 1 3x3 plane curriculum, and Stage 2 27-cell volume curriculum:
 
@@ -38,7 +38,7 @@ Use this top-down reach-limited workspace for Stage 0 workspace-entry, Stage 1 3
 
 This is deliberately smaller than the student workspace. The x-axis is the limiting dimension for this MT4 USD/URDF mapping. A second top-down audit showed that the previous positive-x box was reachable only without the required downward approach; `inside_and_top_down_ready_rate` was `0.000000`.
 
-## Stage 1 3x3 Plane Region Centers
+## Stage 1 3x3 plane 영역 중심
 
 Stage 1 fixes the entry x position at the workspace center and learns only the y/z camera-region match first.
 
@@ -54,7 +54,7 @@ Stage 1 fixes the entry x position at the workspace center and learns only the y
 | 8 | -0.078000 | 0.000000 | 0.121333 |
 | 9 | -0.078000 | 0.031667 | 0.121333 |
 
-## Stage 2 27 Region Centers
+## Stage 2 27개 영역 중심
 
 Region indexing follows the environment code: x column changes first, then y row, then z depth.
 
@@ -88,7 +88,7 @@ Region indexing follows the environment code: x column changes first, then y row
 | 26 | -0.078000 | 0.031667 | 0.121333 |
 | 27 | -0.063000 | 0.031667 | 0.121333 |
 
-## Camera Calibration Flow
+## 카메라 보정 흐름
 
 Initial simulation flow:
 
@@ -113,6 +113,6 @@ Real camera flow later:
 6. Map accepted targets to the 9 plane region IDs first, then the 27 volume region IDs after depth expansion.
 7. Compare camera-estimated coordinates against simulation/internal coordinates before any real robot motion.
 
-## Decision
+## 결정
 
 Stage 1 should not jump directly to the old student 27-cell box. Re-run Stage 0 workspace-entry with this MT4 reach-limited box first, stabilize the 9-cell plane, and only then expand depth into the 27-cell volume.

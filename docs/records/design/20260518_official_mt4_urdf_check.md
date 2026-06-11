@@ -1,4 +1,4 @@
-# Official WLKATA MT4 URDF Check
+# 2026-05-18 WLKATA MT4 공식 URDF 확인 기록
 
 Date: 2026-05-18 13:33:28 KST
 
@@ -6,7 +6,7 @@ Date: 2026-05-18 13:33:28 KST
 
 The local SolidWorks-derived Mirobot/MT4 asset was useful for early IsaacLab bring-up, but the joint-limit GUI sweep showed behavior that looked mechanically disconnected. Since the learning policy is intended to transfer to the physical MT4 arm, the simulation asset should match the vendor model as closely as possible instead of simplifying away the linkage.
 
-## Official source used
+## 사용한 공식 소스
 
 - Repository: `https://github.com/wlkata/Wlkata_MT4_ROS2`
 - Checked local clone commit: `aee2ad2b689dc04cef145f491e4cf257c7ee95bc`
@@ -15,7 +15,7 @@ The local SolidWorks-derived Mirobot/MT4 asset was useful for early IsaacLab bri
 - Local mesh copy: `assets/urdf/wlkata_mt4_official/meshes/`
 - Isaac-generated USD: `assets/usd/wlkata_mt4_official/wlkata_mt4_official.usd`
 
-## Joint structure found in the official URDF
+## 공식 URDF에서 확인한 joint 구조
 
 The official MT4 arm model exposes four active revolute joints:
 
@@ -36,7 +36,7 @@ The remaining URDF joints model the MT4 parallel linkage:
 - `joint10` mimics `joint2` with multiplier `1`.
 - `joint11` mimics `joint3` with multiplier `1`.
 
-## Isaac import adjustment
+## Isaac import 조정
 
 Isaac/PhysX requires mimic revolute joints to have finite limits. The vendor URDF used `continuous` on the mimic linkage joints, so the local pinned copy was adjusted for Isaac import only:
 
@@ -46,7 +46,7 @@ Isaac/PhysX requires mimic revolute joints to have finite limits. The vendor URD
 
 The importer is recorded in `tools/import_official_mt4_urdf.py`.
 
-## Verification
+## 검증
 
 The official URDF was imported with:
 
@@ -67,7 +67,7 @@ Import summary:
 - Articulation root count: `1`
 - Rigid body count: `12`
 
-## Gripper finding
+## gripper 확인 결과
 
 This official MT4 URDF describes the arm body and linkage, but it does not include an actuated gripper finger model. That matches the hardware/software split seen in WLKATA materials: the arm trajectory uses `X/Y/Z/A`, while gripper or pump commands are separate tool/end-effector commands.
 
@@ -77,6 +77,6 @@ For transfer learning, the right split is therefore:
 - Keep the policy arm action mapping aligned to physical `X/Y/Z/A`.
 - Add the gripper/suction behavior as a separate end-effector tool action/model instead of pretending it is `joint4`.
 
-## Next step
+## 다음 작업
 
 Create a second IsaacLab robot config/task variant that uses the official USD and active joints `joint1`, `joint2`, `joint3`, `joint4`. After that GUI sweep passes, migrate the training environment from the older local asset to the official MT4 asset.

@@ -1,6 +1,6 @@
-# 2026-05-18 13:13:25 MT4 Simulation Mapping GUI
+# 2026-05-18 MT4 simulation mapping GUI 확인 기록
 
-## Purpose
+## 목적
 
 Add a GUI check that matches the current training/deployment interface instead of moving raw URDF joints directly.
 
@@ -19,7 +19,7 @@ Internal simulation targets are still sent to the full MT4 asset:
 - `joint_4 = 0.65`
 - `joint_l4 = 0.35`
 
-## Commands
+## 명령
 
 ```bash
 ./scripts/show_mt4_hardware_mapping_gui.sh
@@ -28,7 +28,7 @@ Internal simulation targets are still sent to the full MT4 asset:
 
 Use `axis-sweep` to inspect one real command axis at a time. Use `workspace` to inspect combined poses that look closer to actual reach/pregrasp use.
 
-## What To Check In GUI
+## GUI 확인 항목
 
 - `X` should rotate the base/yaw behavior.
 - `Y` should move the shoulder/linkage side and `joint_2_2` should follow it internally.
@@ -36,7 +36,7 @@ Use `axis-sweep` to inspect one real command axis at a time. Use `workspace` to 
 - `A` should rotate the gripper body.
 - `joint_4` and `joint_l4` should not appear as independently policy-controlled axes. If the visual linkage looks wrong while the four command axes look correct, the next fix should be a calibrated passive-linkage relation inside `_action_to_sim_joint_pos()`, not adding those joints to the policy action.
 
-## Verification
+## 검증
 
 Both profiles were smoke-tested headless:
 

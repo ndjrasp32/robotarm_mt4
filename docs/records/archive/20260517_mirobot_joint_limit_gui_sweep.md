@@ -1,6 +1,6 @@
-# 2026-05-17 23:22:21 Mirobot Joint Limit GUI Sweep
+# 2026-05-17 Mirobot joint limit GUI sweep 기록
 
-## Summary
+## 요약
 
 - purpose: GUI에서 각 policy-controlled joint가 URDF/action clamp의 lower/upper까지 움직이는지 짧게 확인
 - command:
@@ -9,7 +9,7 @@
 ./scripts/sweep_mirobot_joint_limits_gui.sh --move_time 0.8 --hold_time 0.25 --settle_time 1.0 --post_time 2.0
 ```
 
-## Sweep Order
+## sweep 순서
 
 1. `joint_1`: home -> lower -> upper -> home
 2. `joint_2_1`: home -> lower -> upper -> home
@@ -18,7 +18,7 @@
 5. `joint_l4`: home -> lower -> upper -> home
 6. `gripper_body_joint`: home -> lower -> upper -> home
 
-## Notes
+## 메모
 
 - `joint_2_2` is not swept directly as a policy action.
 - During the sweep, `joint_2_2` follows `joint_2_1` through `MirobotReachPregraspEnv._action_to_sim_joint_pos`.

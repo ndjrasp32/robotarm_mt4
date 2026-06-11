@@ -1,12 +1,12 @@
-# 2026-05-18 11:16:47 MT4 Hardware Transfer Mapping
+# 2026-05-18 MT4 hardware transfer mapping 기록
 
-## Decision
+## 결정
 
 The IsaacLab task keeps the real MT4 URDF/USD asset, but the policy action space is now limited to the four arm-angle commands that can be sent to the real MT4 controller.
 
 This avoids training a policy that controls simulation-only linkage joints that have no direct hardware command.
 
-## Hardware-facing action vector
+## 하드웨어 명령 action 벡터
 
 | policy index | Isaac action joint | MT4 SDK angle field | deployment unit |
 | --- | --- | --- | --- |
@@ -19,7 +19,7 @@ The action clamp still uses the URDF lower/upper limits in radians inside IsaacL
 
 Helper code for that conversion is in `source/mirobot_reach_direct/mt4_hardware_mapping.py`.
 
-## Internal simulation joints
+## 내부 simulation joint
 
 | sim joint | current rule | why it is not a policy action |
 | --- | --- | --- |
@@ -27,15 +27,15 @@ Helper code for that conversion is in `source/mirobot_reach_direct/mt4_hardware_
 | `joint_4` | held at `0.65` rad | passive/internal linkage pose pending calibration |
 | `joint_l4` | held at `0.35` rad | passive/internal linkage pose pending calibration |
 
-## Transfer caveat
+## 이식 주의점
 
 The local MT4 CAD/URDF has extra revolute joints for the linkage. URDF represents a tree, so a closed/parallel linkage must be approximated as branches or internal joints. The current mapping is intentionally conservative: train only commands that the real arm can receive, while keeping the full MT4 asset for geometry and collision behavior.
 
 Before deploying a trained policy to the real arm, calibrate or derive the exact passive-linkage relation for `joint_4` and `joint_l4`. If those joints are not constant on the physical mechanism, replace `MirobotReachPregraspEnv._action_to_sim_joint_pos()` with the measured relation instead of adding those joints back to the policy action vector.
 
-## Checked References
+## 확인한 참고자료
 
-- Local MT4 SDK: `vendor/WLKATA-Python-SDK-wlkatapython/MT4_robot/MT4_UART.py` exposes `writeangle(position, x, y, z, a)`.
-- Local MT4 CAD note: `vendor/MT4-STL/README.md` describes the MT4 CAD/STL/STEP asset used for Omniverse/Isaac Sim.
+- 과거 로컬 MT4 SDK 참고 경로: `vendor/WLKATA-Python-SDK-wlkatapython/MT4_robot/MT4_UART.py`. 이 경로의 `writeangle(position, x, y, z, a)` 형태를 기준으로 mapping을 잡았다.
+- 과거 로컬 MT4 CAD 참고 경로: `vendor/MT4-STL/` 아래 README. Omniverse/Isaac Sim용 MT4 CAD/STL/STEP asset 설명으로 사용했다.
 - WLKATA MT4 public product material describes MT4 as a 4+1 DoF / 4-axis robotic arm: https://www.wlkata.com/pages/mt4-robotic-arm
 - WLKATA `RosForMirobot-master` is a separate Mirobot ROS package and uses `mirobot_urdf_2`; it is useful as a comparison, but it is not the MT4 CAD asset currently in this repo: https://github.com/wlkata/RosForMirobot-master

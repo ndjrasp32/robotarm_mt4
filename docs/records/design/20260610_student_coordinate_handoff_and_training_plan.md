@@ -1,4 +1,4 @@
-# 2026-06-10 Student Coordinate Curriculum Handoff and MT4 Training Plan
+# 2026-06-10 MT4 student coordinate handoff 및 학습 계획
 
 ## 목적
 

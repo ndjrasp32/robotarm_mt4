@@ -1,4 +1,4 @@
-# 2026-06-10 MT4 Coordinate Stage 0 Workspace-Entry Result
+# 2026-06-10 MT4 Stage 0 workspace-entry 결과
 
 ## 실행
 

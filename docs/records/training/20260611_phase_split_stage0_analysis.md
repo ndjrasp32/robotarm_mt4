@@ -1,6 +1,6 @@
-# 2026-06-11 MT4 Phase-Split Stage 0 Analysis
+# 2026-06-11 MT4 Stage 0 phase-split 분석
 
-## Goal
+## 목적
 
 탑다운 방식으로 curriculum을 phase 분리한다.
 
@@ -8,7 +8,7 @@
 2. Phase 1 / descent workspace-entry: Phase 0가 latch된 뒤에만 z 방향 descent 및 workspace 내부 진입 보상과 성공 판정을 인정한다.
 3. Stage 1 / 3x3 plane, Stage 2 / 3x3x3 volume은 Stage 0 gate가 통과된 뒤 실행한다.
 
-## Code Change
+## 코드 변경
 
 - Environment: `source/mirobot_reach_direct/mirobot_coordinate_curriculum_env.py`
 - Observation size: `57 -> 60`
@@ -27,7 +27,7 @@
   - required camera visibility
   - `top_down_phase_latched`
 
-## Training Run
+## 학습 실행
 
 | item | value |
 | --- | --- |
@@ -46,7 +46,7 @@ Videos:
 - `/home/spark-robotics/work/isaac/src/IsaacLab/logs/rsl_rl/mirobot_coordinate_curriculum_direct/2026-06-11_14-37-09_mt4_phase_split_progress_stage0_128env_300iter_video/videos/train/rl-video-step-4800.mp4`
 - `/home/spark-robotics/work/isaac/src/IsaacLab/logs/rsl_rl/mirobot_coordinate_curriculum_direct/2026-06-11_14-37-09_mt4_phase_split_progress_stage0_128env_300iter_video/videos/train/rl-video-step-7200.mp4`
 
-## Final Scalars
+## 최종 지표
 
 | metric | first | final | best |
 | --- | ---: | ---: | ---: |
@@ -70,7 +70,7 @@ Videos:
 | `center_3cm_rate` | 0.0000 | 0.0000 | 0.0061 |
 | `center_1cm_rate` | 0.0000 | 0.0000 | 0.0000 |
 
-## Phase Result
+## 단계 결과
 
 | phase | success criterion | final rate | status |
 | --- | --- | ---: | --- |
@@ -81,7 +81,7 @@ Videos:
 | Stage 1 / 3x3 plane | Stage 0 gate must pass first | not run | held |
 | Stage 2 / 3x3x3 volume | Stage 1 must pass first | not run | held |
 
-## Interpretation
+## 해석
 
 The phase split is now observable and measurable, but the current Stage 0 policy still does not satisfy the top-down gate.
 
@@ -89,7 +89,7 @@ The useful part is that x/y alignment started to learn: mean x/y error moved fro
 
 The blocker is z. Mean top-down height error only improved from 12.9 cm to 7.3 cm, and `top_down_height_ready_rate` stayed at 0. This means Phase 0B never completed, so the latch never activated and Phase 1 workspace-entry reward/success stayed blocked by design.
 
-## Next Adjustment
+## 다음 조정
 
 Do not start Stage 1 yet. The next Stage 0 run should make the top-down height setup easier before requiring descent:
 

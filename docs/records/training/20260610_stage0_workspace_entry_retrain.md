@@ -1,4 +1,4 @@
-# 2026-06-10 22:24:12 MT4 Stage 0 Workspace-Entry Retrain
+# 2026-06-10 MT4 Stage 0 workspace-entry 재학습 기록
 
 ## 내 제안
 

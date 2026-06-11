@@ -1,12 +1,12 @@
-# Dynamic Cube Target Setup
+# 2026-05-18 MT4 dynamic cube target 설정 기록
 
 Date: 2026-05-18 13:44:55 KST
 
-## Goal
+## 목적
 
 The first manipulation objective is no longer a pure visual reach target. Since the gripper/tool model is separate from the current arm URDF, the environment now needs a physical object that can be pushed by any robot link. This gives us a useful intermediate stage before modeling a real gripper.
 
-## Changes
+## 변경 사항
 
 - Replaced the red target sphere marker with a real dynamic rigid object:
   - Asset name: `target_cube`
@@ -23,11 +23,11 @@ The first manipulation objective is no longer a pure visual reach target. Since 
 - Kept a small cyan center marker inside the guide area.
 - Removed the old non-end-effector contact penalty from reward shaping by setting `contact_penalty_weight = 0.0`; touching the cube is now allowed instead of punished.
 
-## Current physics choice
+## 현재 물리 설정
 
 The cube is dynamic and collidable, but gravity is disabled for this intermediate stage. That keeps the object inside the existing reach workspace instead of letting it fall before contact. The next more realistic object-manipulation stage should add a table/support surface and turn cube gravity back on.
 
-## Verification
+## 검증
 
 Headless environment check:
 
