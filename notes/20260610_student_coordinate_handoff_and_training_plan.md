@@ -40,8 +40,8 @@
 | --- | --- |
 | `Mirobot-Coordinate-Workspace-Entry-Direct-v0` | MT4 URDF 축으로 gripper가 카메라 가시 작업공간에 들어오는지 확인 |
 | `Mirobot-Coordinate-Plane-Direct-v0` | front 3x3 plane region curriculum |
-| `Mirobot-Coordinate-Volume-Direct-v0` | conservative 3x3x3 volume curriculum |
-| `Mirobot-Coordinate-Volume-Precision-Direct-v0` | 5mm precision 후보, stage1 성공 이후 사용 |
+| `Mirobot-Coordinate-Volume-Direct-v0` | conservative 3x3x3 depth curriculum |
+| `Mirobot-Coordinate-Volume-Precision-Direct-v0` | 5mm precision 후보, depth stage 성공 이후 사용 |
 
 축/조인트 차이 대응:
 
@@ -73,19 +73,19 @@
 - gripper가 보수 작업 박스 근처로 들어온다.
 - passive linkage가 비정상적으로 꺾이지 않는다.
 
-### Stage 1: conservative 3x3x3 volume
+### Stage 1: reach-limited 3x3 plane
 
 명령:
 
 ```bash
-./scripts/train_mirobot_coordinate_stage1_volume_128_600.sh
+./scripts/train_mirobot_coordinate_stage1_plane_128_600.sh
 ```
 
 목표:
 
-- student에서 성공한 보수 작업 박스를 실제 MT4 asset 기준으로 재검증한다.
+- top-down 가동범위 안의 `x=-0.078` 평면에서 y/z 9개 영역을 먼저 안정화한다.
 - `mastered_region_count`, `region_mastery.csv`, `target_three_camera_visible_rate`, `camera_region_match_rate`, `mean_distance`를 본다.
-- 바로 27/27을 기대하지 않고, 어느 영역에서 막히는지 먼저 기록한다.
+- 바로 27/27을 기대하지 않고, 9개 영역 중 어느 영역에서 막히는지 먼저 기록한다.
 
 진행 기준:
 
@@ -93,12 +93,31 @@
 - `inside_workspace_rate=0`이면 작업 박스 또는 gripper offset부터 다시 audit한다.
 - `camera_region_match_rate`가 낮으면 camera mount/FOV부터 수정한다.
 
-### Stage 2: 5mm precision
+### Stage 2: conservative 3x3x3 depth volume
+
+명령:
+
+```bash
+./scripts/train_mirobot_coordinate_stage2_volume_128_600.sh
+```
+
+목표:
+
+- Stage 1의 9개 평면 영역이 안정화된 뒤 x depth를 3단계로 확장한다.
+- `mastered_region_count`, `region_mastery.csv`, `target_three_camera_visible_rate`, `mean_gripper_camera_target_depth`를 본다.
+- 27/27을 바로 전제로 두지 않고 depth별 실패 영역을 기록한다.
+
+진행 기준:
+
+- 9개 평면 기준보다 visibility와 center distance가 크게 나빠지지 않는다.
+- 특정 depth layer가 전부 막히면 workspace x 위치 또는 gripper center offset을 다시 audit한다.
+
+### Stage 3: 5mm precision
 
 조건:
 
-- Stage 1에서 27/27 또는 명확한 plateau와 원인 분석이 끝난 뒤에만 실행한다.
-- Stage 1 checkpoint를 warm start로 사용한다.
+- Stage 2에서 27/27 또는 명확한 plateau와 원인 분석이 끝난 뒤에만 실행한다.
+- Stage 2 checkpoint를 warm start로 사용한다.
 
 목표:
 
@@ -122,4 +141,4 @@
 
 ## 현재 판단
 
-바로 실제 로봇 motion으로 가지 않는다. 오늘의 첫 실행은 Stage 0 workspace-entry smoke다. 이 단계가 통과해야 Stage 1 volume curriculum을 신뢰할 수 있다.
+바로 실제 로봇 motion으로 가지 않는다. 오늘의 첫 실행은 Stage 0 workspace-entry smoke다. 이 단계가 통과해야 Stage 1 3x3 plane curriculum을 신뢰할 수 있다.

@@ -76,6 +76,7 @@
 
 참고 설계 기록: `notes/20260608_dual_pi_camera_perception_plan.md`
 student coordinate curriculum handoff: `notes/20260610_student_coordinate_handoff_and_training_plan.md`
+MT4 reach-limited 27-cell workspace audit: `notes/20260611_mt4_reach_limited_workspace_audit.md`
 
 ### 실제 MT4 이식 기준
 
@@ -99,12 +100,27 @@ student coordinate curriculum handoff: `notes/20260610_student_coordinate_handof
 ./scripts/train_mirobot_reach_128_1000.sh
 ./scripts/train_mirobot_mars_twin.sh push
 ./scripts/train_mirobot_coordinate_stage0_workspace_entry_128_300.sh
-./scripts/train_mirobot_coordinate_stage1_volume_128_600.sh
+./scripts/train_mirobot_coordinate_stage1_plane_128_600.sh
+./scripts/train_mirobot_coordinate_stage2_volume_128_600.sh
 ./scripts/plot_and_select_mirobot_best.sh
 ./scripts/play_mirobot_best.sh
 ```
 
 실제 집기 정책으로 확장하기 전에 joint 대응, end-effector 축, gripper center offset을 GUI에서 반드시 확인해야 합니다.
+
+### MT4 coordinate workspace
+
+2026-06-11 top-down reach sampling 기준으로 Stage 0 workspace-entry, Stage 1 3x3 plane curriculum, Stage 2 27-cell volume curriculum은 아래 작업 박스를 사용합니다.
+
+- center: `(-0.078, 0.000, 0.103)`
+- size: `(0.045, 0.095, 0.055)`
+- min: `(-0.1005, -0.0475, 0.0755)`
+- max: `(-0.0555, 0.0475, 0.1305)`
+- Stage 1 3x3 plane x: `-0.0780`
+- Stage 1 3x3 plane y/z cell size: `(0.0317, 0.0183)`
+- Stage 2 3x3x3 cell size: `(0.0150, 0.0317, 0.0183)`
+
+좌/우 body camera stereo projection으로 target 좌표를 추정하고, gripper camera는 집게 body 기준 `(+X, 0, -Z)` 45도 방향으로 밖에서 안쪽을 보며 최종 상대 위치, depth, visibility를 확인합니다. 정책 관측에는 gripper camera forward 벡터도 포함해 팔의 상하좌우 회전으로 생기는 시야 변화를 학습 입력에 반영합니다. 실제 로봇 motion은 Safety Gate 이후에만 다룹니다.
 
 ## English
 
@@ -182,6 +198,7 @@ Real MT4 device learning and hardware-transfer decisions belong in this reposito
 
 Reference design note: `notes/20260608_dual_pi_camera_perception_plan.md`
 Student coordinate curriculum handoff: `notes/20260610_student_coordinate_handoff_and_training_plan.md`
+MT4 reach-limited 27-cell workspace audit: `notes/20260611_mt4_reach_limited_workspace_audit.md`
 
 ### Real MT4 Transfer Rule
 
@@ -205,9 +222,24 @@ Student coordinate curriculum handoff: `notes/20260610_student_coordinate_handof
 ./scripts/train_mirobot_reach_128_1000.sh
 ./scripts/train_mirobot_mars_twin.sh push
 ./scripts/train_mirobot_coordinate_stage0_workspace_entry_128_300.sh
-./scripts/train_mirobot_coordinate_stage1_volume_128_600.sh
+./scripts/train_mirobot_coordinate_stage1_plane_128_600.sh
+./scripts/train_mirobot_coordinate_stage2_volume_128_600.sh
 ./scripts/plot_and_select_mirobot_best.sh
 ./scripts/play_mirobot_best.sh
 ```
 
 Before extending into real grasping policies, confirm joint correspondence, end-effector axis, and gripper-center offset in the GUI.
+
+### MT4 Coordinate Workspace
+
+As of the 2026-06-11 top-down reach sampling audit, Stage 0 workspace-entry, Stage 1 3x3 plane curriculum, and Stage 2 27-cell volume curriculum use this workspace:
+
+- center: `(-0.078, 0.000, 0.103)`
+- size: `(0.045, 0.095, 0.055)`
+- min: `(-0.1005, -0.0475, 0.0755)`
+- max: `(-0.0555, 0.0475, 0.1305)`
+- Stage 1 3x3 plane x: `-0.0780`
+- Stage 1 3x3 plane y/z cell size: `(0.0317, 0.0183)`
+- Stage 2 3x3x3 cell size: `(0.0150, 0.0317, 0.0183)`
+
+Left/right body-camera stereo projection estimates the target coordinate. The gripper camera points along the gripper-body `(+X, 0, -Z)` 45-degree axis from outside toward the gripper/target side, then validates final relative pose, depth, and visibility. The policy observation includes the dynamic gripper-camera forward vector so arm rotation changes the learned camera view. Keep real robot motion behind the Safety Gate.
