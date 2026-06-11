@@ -217,7 +217,8 @@ class MT4CoordinatePlaneEnvCfg(MT4CoordinateCurriculumEnvCfg):
     master_regions_sequentially = True
     region_mastery_successes = 10
     camera_region_success_radius = 1.35
-    center_success_radius = 0.030
+    center_success_radius = 0.035
+    top_down_xy_success_radius = 0.035
     reach_weight = 5.0
     plane_weight = 3.0
     reach_exp_scale = 18.0
@@ -735,8 +736,11 @@ class MT4CoordinateCurriculumEnv(DirectRLEnv):
             f"{prefix}_top_down_approach_ready_rate": self.top_down_approach_ready.float().mean(),
             f"{prefix}_mean_top_down_xy_error": self.top_down_xy_error.mean(),
             f"{prefix}_mean_approach_lateral_error": self.top_down_xy_error.mean(),
-            f"{prefix}_top_down_xy_1cm_rate": (
+            f"{prefix}_top_down_xy_success_radius_rate": (
                 self.top_down_xy_error < self.cfg.top_down_xy_success_radius
+            ).float().mean(),
+            f"{prefix}_top_down_xy_1cm_rate": (
+                self.top_down_xy_error < 0.010
             ).float().mean(),
             f"{prefix}_approach_lateral_ready_rate": (
                 self.top_down_xy_error < self.cfg.top_down_xy_success_radius

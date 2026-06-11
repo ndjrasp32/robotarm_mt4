@@ -18,7 +18,7 @@ echo "[INFO] Training ${TASK_NAME}"
 echo "[INFO] Stage 1: MT4 URDF reach-limited 3x3 camera-coordinate plane curriculum"
 echo "[INFO] MT4 top-down reach-limited workspace center=(-0.078,0.00,0.103), size=(0.045,0.095,0.055)"
 echo "[INFO] target cells are the 9 y/z regions at x=-0.078 before depth expansion"
-echo "[INFO] success requires same camera cell, body stereo visibility, 45deg gripper-camera visibility, top-down approach alignment, and 3cm center distance"
+echo "[INFO] success requires same camera cell, body stereo visibility, 45deg gripper-camera visibility, 3.5cm top-down XY gate, and 3.5cm center distance"
 echo "[INFO] num_envs=128 max_iterations=${MAX_ITERATIONS} headless=true"
 
 "${ISAACLAB_DIR}/isaaclab.sh" -p "${PROJECT_DIR}/tools/rsl_rl/train_mirobot.py" \
@@ -27,5 +27,5 @@ echo "[INFO] num_envs=128 max_iterations=${MAX_ITERATIONS} headless=true"
   --max_iterations "${MAX_ITERATIONS}" \
   --headless \
   --seed "${MT4_SEED:-42}" \
-  --run_name mt4_coordinate_plane_9cell_128env_600iter \
+  --run_name mt4_coordinate_plane_9cell_035_128env_600iter \
   "$@"
