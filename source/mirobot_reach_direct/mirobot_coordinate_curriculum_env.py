@@ -215,7 +215,7 @@ class MT4CoordinatePlaneEnvCfg(MT4CoordinateCurriculumEnvCfg):
     camera_look_at = REACH_LIMITED_VOLUME_WORKSPACE_CENTER
     front_face_region_targets = True
     master_regions_sequentially = True
-    region_mastery_successes = 10
+    region_mastery_successes = 5
     camera_region_success_radius = 1.35
     center_success_radius = 0.035
     top_down_xy_success_radius = 0.035
@@ -377,7 +377,7 @@ class MT4CoordinateCurriculumEnv(DirectRLEnv):
             self.region_depth = int(self.cfg.volume_region_shape[2])
         self.regions_per_face = self.region_cols * self.region_rows
         self.total_regions = self.region_cols * self.region_rows * self.region_depth
-        self.region_curriculum_order = self._center_first_region_order()
+        self.region_curriculum_order = self._sequential_region_order()
         self.active_region_order_index = 0
         self.next_region_id = 0
         self.active_region_id = self.region_curriculum_order[self.active_region_order_index]
@@ -599,6 +599,7 @@ class MT4CoordinateCurriculumEnv(DirectRLEnv):
                 - self.cfg.joint_velocity_penalty_weight * joint_velocity_penalty
                 - self.cfg.time_penalty_weight
             )
+            rewards = self._mask_mastered_region_rewards(rewards)
             self.episode_rewards += rewards.detach()
             return rewards
 
@@ -643,6 +644,7 @@ class MT4CoordinateCurriculumEnv(DirectRLEnv):
                 - self.cfg.joint_velocity_penalty_weight * joint_velocity_penalty
                 - self.cfg.time_penalty_weight
             )
+            rewards = self._mask_mastered_region_rewards(rewards)
             self.episode_rewards += rewards.detach()
             return rewards
 
@@ -694,6 +696,7 @@ class MT4CoordinateCurriculumEnv(DirectRLEnv):
             - self.cfg.joint_velocity_penalty_weight * joint_velocity_penalty
             - self.cfg.time_penalty_weight
         )
+        rewards = self._mask_mastered_region_rewards(rewards)
         self.episode_rewards += rewards.detach()
         return rewards
 
@@ -1465,26 +1468,14 @@ class MT4CoordinateCurriculumEnv(DirectRLEnv):
             and self.cfg.curriculum_stage == "plane_localization"
         )
 
-    def _center_first_region_order(self) -> list[int]:
-        region_ids = list(range(self.total_regions))
-        center_col = (self.region_cols - 1) / 2.0
-        center_row = (self.region_rows - 1) / 2.0
-        center_depth = (self.region_depth - 1) / 2.0
+    def _sequential_region_order(self) -> list[int]:
+        return list(range(self.total_regions))
 
-        def distance_from_center(region_id: int) -> tuple[float, int]:
-            plane_cells = self.region_cols * self.region_rows
-            depth_id = region_id // plane_cells
-            cell_id = region_id % plane_cells
-            row_id = cell_id // self.region_cols
-            col_id = cell_id % self.region_cols
-            distance = (
-                abs(col_id - center_col)
-                + abs(row_id - center_row)
-                + abs(depth_id - center_depth)
-            )
-            return distance, region_id
-
-        return sorted(region_ids, key=distance_from_center)
+    def _mask_mastered_region_rewards(self, rewards: torch.Tensor) -> torch.Tensor:
+        if not self._uses_region_mastery() or not torch.any(self.region_mastered):
+            return rewards
+        unmastered_target = ~self.region_mastered[self.region_ids]
+        return torch.where(unmastered_target, rewards, torch.zeros_like(rewards))
 
     def _update_region_mastery(self, success: torch.Tensor):
         if not self._uses_region_mastery() or not torch.any(success):

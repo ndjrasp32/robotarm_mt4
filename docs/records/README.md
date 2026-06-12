@@ -64,6 +64,7 @@ YYYYMMDD_<element>_<topic>_<record_type>.md
 | MT4 hardware mapping | `design/20260518_mt4_hardware_transfer_mapping.md` |
 | 2026-06-11 학습 산출물 묶음 | `training/20260611_artifact_index.md` |
 | 최신 Stage 0 엔트리 게이트 결과 | `training/20260611_reach_aware_stage0_entrygate_600iter_analysis.md` |
+| 최신 Stage 1 순차 9영역 결과 | `training/20260612_stage1_seq9_5success_analysis.md` |
 
 ## English
 
