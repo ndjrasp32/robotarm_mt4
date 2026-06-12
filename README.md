@@ -111,15 +111,16 @@ MT4 reach-limited 27-cell workspace audit: `docs/records/design/20260611_mt4_rea
 
 ### MT4 coordinate workspace
 
-2026-06-11 top-down reach sampling 기준으로 Stage 0 workspace-entry, Stage 1 3x3 plane curriculum, Stage 2 27-cell volume curriculum은 아래 작업 박스를 사용합니다.
+2026-06-12 기준으로 Stage 1은 5x5 plane curriculum, Stage 2는 5x5x4 volume curriculum을 사용합니다. 7/9 상단열 병목 이후 작업 박스는 로봇팔 쪽으로 10mm 당긴 arm/end 기준을 사용하고, 미래 하향 장착 집게 끝점을 반영해 target workspace는 35mm 낮춥니다.
 
-- center: `(-0.078, 0.000, 0.103)`
+- arm/end center: `(-0.068, 0.000, 0.103)`
+- target center after tool-tip offset: `(-0.068, 0.000, 0.068)`
 - size: `(0.045, 0.095, 0.055)`
-- min: `(-0.1005, -0.0475, 0.0755)`
-- max: `(-0.0555, 0.0475, 0.1305)`
-- Stage 1 3x3 plane x: `-0.0780`
-- Stage 1 3x3 plane y/z cell size: `(0.0317, 0.0183)`
-- Stage 2 3x3x3 cell size: `(0.0150, 0.0317, 0.0183)`
+- target min: `(-0.0905, -0.0475, 0.0405)`
+- target max: `(-0.0455, 0.0475, 0.0955)`
+- Stage 1 5x5 plane x: `-0.0680`
+- Stage 1 5x5 plane y/z cell size: `(0.0190, 0.0110)`
+- Stage 2 5x5x4 cell size: `(0.0090, 0.0190, 0.0138)`
 
 좌/우 body camera stereo projection으로 target 좌표를 추정하고, gripper camera는 집게 body 기준 `(+X, 0, -Z)` 45도 방향으로 밖에서 안쪽을 보며 최종 상대 위치, depth, visibility를 확인합니다. 정책 관측에는 gripper camera forward 벡터도 포함해 팔의 상하좌우 회전으로 생기는 시야 변화를 학습 입력에 반영합니다. 실제 로봇 motion은 Safety Gate 이후에만 다룹니다.
 
@@ -234,14 +235,15 @@ Before extending into real grasping policies, confirm joint correspondence, end-
 
 ### MT4 Coordinate Workspace
 
-As of the 2026-06-11 top-down reach sampling audit, Stage 0 workspace-entry, Stage 1 3x3 plane curriculum, and Stage 2 27-cell volume curriculum use this workspace:
+As of 2026-06-12, Stage 1 uses a 5x5 plane curriculum and Stage 2 uses a 5x5x4 volume curriculum. After the region 7/9 upper-row bottleneck, the arm/end workspace is pulled 10 mm toward the robot, and the target workspace is shifted 35 mm lower for the future down-mounted gripper tip.
 
-- center: `(-0.078, 0.000, 0.103)`
+- arm/end center: `(-0.068, 0.000, 0.103)`
+- target center after tool-tip offset: `(-0.068, 0.000, 0.068)`
 - size: `(0.045, 0.095, 0.055)`
-- min: `(-0.1005, -0.0475, 0.0755)`
-- max: `(-0.0555, 0.0475, 0.1305)`
-- Stage 1 3x3 plane x: `-0.0780`
-- Stage 1 3x3 plane y/z cell size: `(0.0317, 0.0183)`
-- Stage 2 3x3x3 cell size: `(0.0150, 0.0317, 0.0183)`
+- target min: `(-0.0905, -0.0475, 0.0405)`
+- target max: `(-0.0455, 0.0475, 0.0955)`
+- Stage 1 5x5 plane x: `-0.0680`
+- Stage 1 5x5 plane y/z cell size: `(0.0190, 0.0110)`
+- Stage 2 5x5x4 cell size: `(0.0090, 0.0190, 0.0138)`
 
 Left/right body-camera stereo projection estimates the target coordinate. The gripper camera points along the gripper-body `(+X, 0, -Z)` 45-degree axis from outside toward the gripper/target side, then validates final relative pose, depth, and visibility. The policy observation includes the dynamic gripper-camera forward vector so arm rotation changes the learned camera view. Keep real robot motion behind the Safety Gate.

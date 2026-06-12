@@ -10,7 +10,7 @@ python3 -m compileall -q source tools
 
 cd "${ISAACLAB_DIR}"
 export PYTHONPATH="${PROJECT_DIR}/source:${PYTHONPATH:-}"
-if [[ -z "${TERM:-}" || "${TERM}" == "dumb" ]]; then
+if [[ -z "${TERM:-}" || "${TERM}" == "dumb" || "${TERM}" == "unknown" ]]; then
   export TERM=xterm-256color
 fi
 ./isaaclab.sh -p - <<'PY'

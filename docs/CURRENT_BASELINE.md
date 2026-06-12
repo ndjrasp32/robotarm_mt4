@@ -1,6 +1,6 @@
 # 현재 기준 - robotarm_mt4
 
-Date: 2026-06-11 KST
+Date: 2026-06-12 KST
 
 ## 한국어
 
@@ -95,7 +95,7 @@ Repeatable training:
 ./scripts/play_mirobot_best.sh
 ```
 
-2026-06-10 Stage 0 coordinate workspace-entry 학습은 task/runtime 포팅 확인에는 성공했지만, `inside_workspace_rate=0.0000`으로 끝났습니다. 2026-06-11 top-down reach sampling 기준으로 MT4 작업 박스를 `center=(-0.078, 0.000, 0.103)`, `size=(0.045, 0.095, 0.055)`로 다시 잡았고, 최신 Stage 0은 reach-aware workspace-entry gate 기준으로 기록합니다. gripper camera는 집게 body 기준 `(+X, 0, -Z)` 45도 방향으로 밖에서 안쪽을 보게 두고, 관측에는 동적 gripper-camera forward 벡터를 포함합니다. 학습 순서는 Stage 0 workspace-entry, Stage 1 3x3 plane, Stage 2 27-cell volume입니다.
+2026-06-10 Stage 0 coordinate workspace-entry 학습은 task/runtime 포팅 확인에는 성공했지만, `inside_workspace_rate=0.0000`으로 끝났습니다. 2026-06-11 top-down reach sampling 기준으로 MT4 작업 박스를 다시 잡았고, 2026-06-12 region 7/9 병목 이후 arm/end 기준 중심을 `(-0.068, 0.000, 0.103)`으로 로봇팔 쪽에 10mm 당겼습니다. 미래 하향 장착 집게 끝점을 반영해 target workspace는 35mm 낮춘 `(-0.068, 0.000, 0.068)`, `size=(0.045, 0.095, 0.055)`를 사용합니다. gripper camera는 집게 body 기준 `(+X, 0, -Z)` 45도 방향으로 밖에서 안쪽을 보게 두고, 관측에는 동적 gripper-camera forward 벡터를 포함합니다. 학습 순서는 Stage 0 workspace-entry, Stage 1 5x5 plane, Stage 2 5x5x4 volume입니다.
 
 ### Safety Gate
 
@@ -221,7 +221,7 @@ Repeatable training:
 ./scripts/play_mirobot_best.sh
 ```
 
-The 2026-06-10 Stage 0 coordinate workspace-entry run validated task/runtime porting, but ended with `inside_workspace_rate=0.0000`. The 2026-06-11 top-down reach sampling audit moved the MT4 workspace to `center=(-0.078, 0.000, 0.103)`, `size=(0.045, 0.095, 0.055)`, and the latest Stage 0 baseline is the reach-aware workspace-entry gate run. The gripper camera points along the gripper-body `(+X, 0, -Z)` 45-degree axis from outside toward the gripper/target side, and the observation includes the dynamic gripper-camera forward vector. The order is now Stage 0 workspace-entry, Stage 1 3x3 plane, then Stage 2 27-cell volume.
+The 2026-06-10 Stage 0 coordinate workspace-entry run validated task/runtime porting, but ended with `inside_workspace_rate=0.0000`. The 2026-06-11 top-down reach sampling audit redefined the MT4 workspace, and after the 2026-06-12 region 7/9 bottleneck the arm/end center was pulled 10 mm toward the robot to `(-0.068, 0.000, 0.103)`. For the future down-mounted gripper tip, the target workspace is shifted 35 mm lower to `(-0.068, 0.000, 0.068)`, `size=(0.045, 0.095, 0.055)`. The gripper camera points along the gripper-body `(+X, 0, -Z)` 45-degree axis from outside toward the gripper/target side, and the observation includes the dynamic gripper-camera forward vector. The order is now Stage 0 workspace-entry, Stage 1 5x5 plane, then Stage 2 5x5x4 volume.
 
 ### Safety Gate
 

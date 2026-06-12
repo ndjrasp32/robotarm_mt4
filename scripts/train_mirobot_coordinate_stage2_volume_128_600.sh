@@ -15,8 +15,8 @@ fi
 MAX_ITERATIONS="${MT4_MAX_ITERATIONS:-600}"
 
 echo "[INFO] Training ${TASK_NAME}"
-echo "[INFO] Stage 2: MT4 URDF 3x3x3 camera-coordinate depth curriculum"
-echo "[INFO] MT4 top-down reach-limited workspace center=(-0.078,0.00,0.103), size=(0.045,0.095,0.055)"
+echo "[INFO] Stage 2: MT4 URDF 5x5x4 camera-coordinate depth curriculum"
+echo "[INFO] MT4 top-down reach-limited workspace center=(-0.068,0.00,0.103), size=(0.045,0.095,0.055)"
 echo "[INFO] success requires same 3D cell, body stereo visibility, 45deg gripper-camera visibility, top-down approach alignment, and 1cm center distance"
 echo "[INFO] num_envs=128 max_iterations=${MAX_ITERATIONS} headless=true"
 
@@ -26,5 +26,5 @@ echo "[INFO] num_envs=128 max_iterations=${MAX_ITERATIONS} headless=true"
   --max_iterations "${MAX_ITERATIONS}" \
   --headless \
   --seed "${MT4_SEED:-42}" \
-  --run_name mt4_coordinate_volume_27cell_128env_600iter \
+  --run_name mt4_coordinate_volume_100cell_128env_${MAX_ITERATIONS}iter \
   "$@"
