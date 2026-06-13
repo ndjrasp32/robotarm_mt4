@@ -165,6 +165,7 @@ class MT4CoordinateCurriculumEnvCfg(DirectRLEnvCfg):
     front_face_region_targets = False
     sequential_region_targets = True
     focus_region_number = int(os.environ.get("MT4_FOCUS_REGION", "0") or "0")
+    region_stall_step_limit = int(os.environ.get("MT4_REGION_STALL_STEPS", "0") or "0")
     region_target_jitter_fraction = 0.20
 
     reach_weight = 3.0
@@ -405,7 +406,12 @@ class MT4CoordinateCurriculumEnv(DirectRLEnv):
         self.region_success_counts = torch.zeros((self.total_regions,), dtype=torch.long, device=self.device)
         self.region_best_episode_reward = torch.full((self.total_regions,), -float("inf"), device=self.device)
         self.region_mastered = torch.zeros((self.total_regions,), dtype=torch.bool, device=self.device)
+        self.region_skipped = torch.zeros((self.total_regions,), dtype=torch.bool, device=self.device)
+        self.region_skip_reasons = [""] * self.total_regions
         self.region_mastery_snapshot_writes = 0
+        self.curriculum_step_counter = 0
+        self.active_region_started_step = 0
+        self.active_region_last_success_step = 0
 
         self.target_pos = torch.zeros((self.num_envs, 3), device=self.device)
         self.face_ids = torch.zeros((self.num_envs,), dtype=torch.long, device=self.device)
@@ -739,8 +745,12 @@ class MT4CoordinateCurriculumEnv(DirectRLEnv):
         raw_success = self._success()
         new_success = self._latch_successes(raw_success)
         success = raw_success | self.success_latched
+        self.curriculum_step_counter += 1
         self._update_region_mastery(new_success)
         time_out = self.episode_length_buf >= self.max_episode_length - 1
+        skipped_region = self._skip_stalled_active_region()
+        if skipped_region:
+            time_out = torch.ones_like(time_out)
 
         prefix = f"coordinate_curriculum/{self.cfg.curriculum_stage}"
         center_success_rate = (self.distance < self.cfg.center_success_radius).float().mean()
@@ -837,6 +847,7 @@ class MT4CoordinateCurriculumEnv(DirectRLEnv):
             ).mean(),
             f"{prefix}_active_region_number": torch.tensor(float(self.active_region_id + 1), device=self.device),
             f"{prefix}_mastered_region_count": self.region_mastered.float().sum(),
+            f"{prefix}_skipped_region_count": self.region_skipped.float().sum(),
         }
         for region_id in range(self.total_regions):
             region_mask = self.region_ids == region_id
@@ -851,6 +862,7 @@ class MT4CoordinateCurriculumEnv(DirectRLEnv):
             ].float()
             log_data[f"{prefix}_region_{region_id + 1:02d}_best_episode_reward"] = best_reward
             log_data[f"{prefix}_region_{region_id + 1:02d}_mastered"] = self.region_mastered[region_id].float()
+            log_data[f"{prefix}_region_{region_id + 1:02d}_skipped"] = self.region_skipped[region_id].float()
         for face_id, face_name in enumerate(("x_min", "x_max", "y_min", "y_max", "z_min", "z_max")):
             face_mask = self.face_ids == face_id
             face_count = face_mask.float().sum().clamp(min=1.0)
@@ -1534,6 +1546,8 @@ class MT4CoordinateCurriculumEnv(DirectRLEnv):
             best_reward = torch.max(success_rewards[region_mask])
             if best_reward > self.region_best_episode_reward[region_id]:
                 self.region_best_episode_reward[region_id] = best_reward
+            if region_id == self.active_region_id:
+                self.active_region_last_success_step = self.curriculum_step_counter
 
         mastery_target = max(int(self.cfg.region_mastery_successes), 1)
         while (
@@ -1541,15 +1555,43 @@ class MT4CoordinateCurriculumEnv(DirectRLEnv):
             and int(self.region_success_counts[self.active_region_id].item()) >= mastery_target
         ):
             self.region_mastered[self.active_region_id] = True
-            self.active_region_order_index += 1
-            if self.active_region_order_index < len(self.region_curriculum_order):
-                self.active_region_id = self.region_curriculum_order[self.active_region_order_index]
+            self._advance_active_region()
 
         if self.active_region_order_index >= len(self.region_curriculum_order):
             self.active_region_order_index = len(self.region_curriculum_order) - 1
             self.active_region_id = self.region_curriculum_order[self.active_region_order_index]
 
         self._write_region_mastery_snapshot()
+
+    def _advance_active_region(self):
+        self.active_region_order_index += 1
+        if self.active_region_order_index < len(self.region_curriculum_order):
+            self.active_region_id = self.region_curriculum_order[self.active_region_order_index]
+            self.active_region_started_step = self.curriculum_step_counter
+            self.active_region_last_success_step = self.curriculum_step_counter
+
+    def _skip_stalled_active_region(self) -> bool:
+        if not self._uses_region_mastery() or self.focus_region_id is not None:
+            return False
+        step_limit = int(self.cfg.region_stall_step_limit)
+        if step_limit <= 0:
+            return False
+        if self.active_region_order_index >= len(self.region_curriculum_order):
+            return False
+        if bool(self.region_mastered[self.active_region_id].item()) or bool(
+            self.region_skipped[self.active_region_id].item()
+        ):
+            return False
+
+        last_progress_step = max(self.active_region_started_step, self.active_region_last_success_step)
+        if self.curriculum_step_counter - last_progress_step < step_limit:
+            return False
+
+        self.region_skipped[self.active_region_id] = True
+        self.region_skip_reasons[self.active_region_id] = f"no_new_success_for_{step_limit}_env_steps"
+        self._advance_active_region()
+        self._write_region_mastery_snapshot()
+        return True
 
     def _write_region_mastery_snapshot(self):
         log_dir = getattr(self.cfg, "log_dir", None)
@@ -1558,18 +1600,32 @@ class MT4CoordinateCurriculumEnv(DirectRLEnv):
 
         out_path = Path(log_dir) / "region_mastery.csv"
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        lines = ["region_number,success_count,best_episode_reward,mastered,active\n"]
+        lines = ["region_number,success_count,best_episode_reward,mastered,skipped,active,status,skip_reason\n"]
         for region_id in range(self.total_regions):
             best_reward = self.region_best_episode_reward[region_id]
             best_value = "" if not torch.isfinite(best_reward) else f"{float(best_reward.item()):.6f}"
+            mastered = bool(self.region_mastered[region_id].item())
+            skipped = bool(self.region_skipped[region_id].item())
+            active = region_id == self.active_region_id
+            if mastered:
+                status = "mastered"
+            elif skipped:
+                status = "skipped"
+            elif active:
+                status = "active"
+            else:
+                status = "pending"
             lines.append(
                 ",".join(
                     [
                         str(region_id + 1),
                         str(int(self.region_success_counts[region_id].item())),
                         best_value,
-                        "1" if bool(self.region_mastered[region_id].item()) else "0",
-                        "1" if region_id == self.active_region_id else "0",
+                        "1" if mastered else "0",
+                        "1" if skipped else "0",
+                        "1" if active else "0",
+                        status,
+                        self.region_skip_reasons[region_id],
                     ]
                 )
                 + "\n"
