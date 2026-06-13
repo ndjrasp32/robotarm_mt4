@@ -42,7 +42,7 @@ Main task IDs:
 - student coordinate curriculum handoff: `docs/records/design/20260610_student_coordinate_handoff_and_training_plan.md`
 - latest MT4 coordinate Stage 0 result: `docs/records/training/20260611_reach_aware_stage0_entrygate_600iter_analysis.md`
 - MT4 reach-limited 27-cell workspace audit: `docs/records/design/20260611_mt4_reach_limited_workspace_audit.md`
-- latest MT4 coordinate Stage 1 plane result: `docs/records/training/20260613_stage1_seq25_skipstalled3840_analysis.md`
+- latest MT4 coordinate Stage 1 plane result: `docs/records/training/20260613_stage1_seq25_128env_rerun_analysis.md`
 
 ### 실제 MT4 Perception Baseline
 
@@ -169,7 +169,7 @@ Current hardware-transfer rule:
 - student coordinate curriculum handoff: `docs/records/design/20260610_student_coordinate_handoff_and_training_plan.md`
 - latest MT4 coordinate Stage 0 result: `docs/records/training/20260611_reach_aware_stage0_entrygate_600iter_analysis.md`
 - MT4 reach-limited 27-cell workspace audit: `docs/records/design/20260611_mt4_reach_limited_workspace_audit.md`
-- latest MT4 coordinate Stage 1 plane result: `docs/records/training/20260613_stage1_seq25_skipstalled3840_analysis.md`
+- latest MT4 coordinate Stage 1 plane result: `docs/records/training/20260613_stage1_seq25_128env_rerun_analysis.md`
 
 ### Real MT4 Perception Baseline
 

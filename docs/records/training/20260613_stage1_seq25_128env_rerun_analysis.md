@@ -8,19 +8,22 @@
 
 최종 결과는 `14/25` mastered, `11/25` skipped다. `1..14` 영역은 10회 이상 성공했고, `15..25` 영역은 새 성공 없이 정체되어 모두 skipped로 기록됐다.
 
+2026-06-13 17:38 KST 재실행에서는 전체 영역 기록 완료 시 trainer가 정상 종료되도록 코드가 보강됐다. 마지막 영역이 `active`로 남지 않고, runner가 `iteration 1880`에서 checkpoint를 저장한 뒤 종료했다.
+
 ## 실행 조건
 
 | 항목 | 값 |
 | --- | --- |
 | task | `Mirobot-Coordinate-Plane-Direct-v0` |
 | command | `MT4_MAX_ITERATIONS=3000 MT4_REGION_STALL_STEPS=3840 MT4_TOOL_TIP_DOWN_OFFSET=0.035 ./scripts/train_mirobot_coordinate_stage1_plane_sweep25_skip.sh --device cuda:0` |
-| run dir | `/home/spark-robotics/work/isaac/src/IsaacLab/logs/rsl_rl/mirobot_coordinate_curriculum_direct/2026-06-13_16-41-58_mt4_coordinate_plane_seq25_skipstalled3840_tipdown35mm_128env_3000iter` |
-| stdout log | `training_logs/run_stdout/20260613_164153_seq25_128env_stall3840.log` |
+| run dir | `/home/spark-robotics/work/isaac/src/IsaacLab/logs/rsl_rl/mirobot_coordinate_curriculum_direct/2026-06-13_17-38-14_mt4_coordinate_plane_seq25_skipstalled3840_tipdown35mm_128env_3000iter` |
+| stdout log | `training_logs/run_stdout/20260613_173809_seq25_128env_stall3840_after_stopfix.log` |
 | num envs | `128` |
 | device | `cuda:0` |
 | seed | `42` |
 | max iterations | `3000`, but stopped after all 25 regions were recorded |
-| stopped iteration | about `1957/3000` |
+| stopped iteration | `1880/3000` |
+| training time | `1542.8s` |
 | mastery target | `10` successes per region |
 | stall skip limit | `3840 env steps without new success` |
 | tool-tip down offset | `0.035 m` |
@@ -31,12 +34,9 @@
 | --- | ---: |
 | mastered regions | `14/25` |
 | skipped regions | `11/25` |
-| final active region number | `25` |
-| final mean distance | about `0.033 m` |
-| final top-down XY error | about `0.020 m` |
-| final target gripper-camera visible rate | `1.0000` |
+| final active region number | none; curriculum complete |
 | final success rate | `0.0000` |
-| final center 3cm rate | `0.0000` |
+| final stop reason | all 25 regions recorded |
 
 ## Region mastery
 
@@ -62,11 +62,18 @@
 
 이번 coordinate run 전용 checkpoint 선택기는 별도로 없어서, 기존 `plot_and_select_mirobot_best.sh` 결과는 사용하지 않았다. 해당 스크립트는 예전 `mirobot_reach_pregrasp_direct` 실험을 선택하므로 이번 결과와 맞지 않는다.
 
-이번 run에서는 모든 영역 상태가 완료된 뒤 관측된 `Mean reward`가 가장 높았던 구간이 1898-1901 iteration이고, 그 구간에 저장된 checkpoint는 아래 파일이다.
+이번 stop-fix run의 stdout 기준 최고 `Mean reward`는 iteration `1032`의 `24603.21`이다. 저장된 checkpoint 중 mean reward가 가장 높은 저장 지점은 iteration `1000`이고, 해당 checkpoint는 아래 파일이다.
 
-`/home/spark-robotics/work/isaac/src/IsaacLab/logs/rsl_rl/mirobot_coordinate_curriculum_direct/2026-06-13_16-41-58_mt4_coordinate_plane_seq25_skipstalled3840_tipdown35mm_128env_3000iter/model_1900.pt`
+`/home/spark-robotics/work/isaac/src/IsaacLab/logs/rsl_rl/mirobot_coordinate_curriculum_direct/2026-06-13_17-38-14_mt4_coordinate_plane_seq25_skipstalled3840_tipdown35mm_128env_3000iter/model_1000.pt`
 
-최신 checkpoint는 `model_1950.pt`이지만, 마지막 구간의 mean reward 기준 대표 checkpoint는 `model_1900.pt`로 본다. 추가 평가 없이 raw checkpoint를 삭제하지는 않았다.
+최종 정상 종료 checkpoint는 `model_1880.pt`다. 다만 이번 선택은 stdout의 mean reward 기준이며, 별도 play/evaluation으로 검증한 best policy는 아니다.
+
+## 코드 확인
+
+- `region_mastery.csv`에서 curriculum complete 이후 active region이 남지 않도록 수정했다.
+- `coordinate_curriculum/plane_localization_region_curriculum_complete` 로그를 추가했다.
+- 모든 영역이 mastered/skipped로 기록되면 trainer가 checkpoint를 저장하고 정상 종료하도록 `train_mirobot.py`에 optional stop hook을 추가했다.
+- 원시 stdout 로그는 크기가 커서 `training_logs/run_stdout/`를 git ignore 처리하고, 요약 분석만 문서로 남긴다.
 
 ## 판단
 
