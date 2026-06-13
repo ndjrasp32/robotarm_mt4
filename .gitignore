@@ -4,6 +4,6 @@ __pycache__/
 .ruff_cache/
 
 logs/
+training_logs/run_stdout/
 data/
 experiments/*_metrics.csv
-

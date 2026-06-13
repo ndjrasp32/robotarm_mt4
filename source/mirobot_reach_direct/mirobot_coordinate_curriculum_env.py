@@ -166,6 +166,9 @@ class MT4CoordinateCurriculumEnvCfg(DirectRLEnvCfg):
     sequential_region_targets = True
     focus_region_number = int(os.environ.get("MT4_FOCUS_REGION", "0") or "0")
     region_stall_step_limit = int(os.environ.get("MT4_REGION_STALL_STEPS", "0") or "0")
+    stop_when_all_regions_recorded = bool(
+        int(os.environ.get("MT4_STOP_WHEN_ALL_REGIONS_RECORDED", "1") or "1")
+    )
     region_target_jitter_fraction = 0.20
 
     reach_weight = 3.0
@@ -845,9 +848,16 @@ class MT4CoordinateCurriculumEnv(DirectRLEnv):
                 if self.cfg.curriculum_stage == "plane_localization"
                 else torch.zeros_like(raw_success.float())
             ).mean(),
-            f"{prefix}_active_region_number": torch.tensor(float(self.active_region_id + 1), device=self.device),
+            f"{prefix}_active_region_number": torch.tensor(
+                0.0 if self.is_region_curriculum_complete() else float(self.active_region_id + 1),
+                device=self.device,
+            ),
             f"{prefix}_mastered_region_count": self.region_mastered.float().sum(),
             f"{prefix}_skipped_region_count": self.region_skipped.float().sum(),
+            f"{prefix}_region_curriculum_complete": torch.tensor(
+                float(self.is_region_curriculum_complete()),
+                device=self.device,
+            ),
         }
         for region_id in range(self.total_regions):
             region_mask = self.region_ids == region_id
@@ -943,6 +953,13 @@ class MT4CoordinateCurriculumEnv(DirectRLEnv):
 
     def _next_region_ids(self, n: int) -> torch.Tensor:
         if self._uses_region_mastery():
+            if self.is_region_curriculum_complete():
+                return torch.full(
+                    (n,),
+                    self.region_curriculum_order[-1],
+                    dtype=torch.long,
+                    device=self.device,
+                )
             return torch.full((n,), self.active_region_id, dtype=torch.long, device=self.device)
         if self.cfg.sequential_region_targets:
             region_ids = (torch.arange(n, device=self.device) + self.next_region_id) % self.total_regions
@@ -1522,19 +1539,29 @@ class MT4CoordinateCurriculumEnv(DirectRLEnv):
             and self.cfg.curriculum_stage == "plane_localization"
         )
 
+    def is_region_curriculum_complete(self) -> bool:
+        return (
+            self._uses_region_mastery()
+            and self.active_region_order_index >= len(self.region_curriculum_order)
+        )
+
+    def should_stop_training(self) -> bool:
+        return bool(self.cfg.stop_when_all_regions_recorded) and self.is_region_curriculum_complete()
+
     def _sequential_region_order(self) -> list[int]:
         return list(range(self.total_regions))
 
     def _mask_mastered_region_rewards(self, rewards: torch.Tensor) -> torch.Tensor:
         if self.focus_region_id is not None:
             return rewards
-        if not self._uses_region_mastery() or not torch.any(self.region_mastered):
+        recorded_regions = self.region_mastered | self.region_skipped
+        if not self._uses_region_mastery() or not torch.any(recorded_regions):
             return rewards
-        unmastered_target = ~self.region_mastered[self.region_ids]
-        return torch.where(unmastered_target, rewards, torch.zeros_like(rewards))
+        unrecorded_target = ~recorded_regions[self.region_ids]
+        return torch.where(unrecorded_target, rewards, torch.zeros_like(rewards))
 
     def _update_region_mastery(self, success: torch.Tensor):
-        if not self._uses_region_mastery() or not torch.any(success):
+        if not self._uses_region_mastery() or self.is_region_curriculum_complete() or not torch.any(success):
             return
 
         success_region_ids = self.region_ids[success].detach()
@@ -1558,8 +1585,8 @@ class MT4CoordinateCurriculumEnv(DirectRLEnv):
             self._advance_active_region()
 
         if self.active_region_order_index >= len(self.region_curriculum_order):
-            self.active_region_order_index = len(self.region_curriculum_order) - 1
-            self.active_region_id = self.region_curriculum_order[self.active_region_order_index]
+            self._write_region_mastery_snapshot()
+            return
 
         self._write_region_mastery_snapshot()
 
@@ -1601,12 +1628,13 @@ class MT4CoordinateCurriculumEnv(DirectRLEnv):
         out_path = Path(log_dir) / "region_mastery.csv"
         out_path.parent.mkdir(parents=True, exist_ok=True)
         lines = ["region_number,success_count,best_episode_reward,mastered,skipped,active,status,skip_reason\n"]
+        complete = self.is_region_curriculum_complete()
         for region_id in range(self.total_regions):
             best_reward = self.region_best_episode_reward[region_id]
             best_value = "" if not torch.isfinite(best_reward) else f"{float(best_reward.item()):.6f}"
             mastered = bool(self.region_mastered[region_id].item())
             skipped = bool(self.region_skipped[region_id].item())
-            active = region_id == self.active_region_id
+            active = (not complete) and region_id == self.active_region_id
             if mastered:
                 status = "mastered"
             elif skipped:

@@ -82,6 +82,7 @@ from datetime import datetime
 
 import gymnasium as gym
 import torch
+from rsl_rl.runners.on_policy_runner import check_nan
 from rsl_rl.runners import DistillationRunner, OnPolicyRunner
 
 from isaaclab.envs import (
@@ -110,6 +111,82 @@ torch.backends.cuda.matmul.allow_tf32 = True
 torch.backends.cudnn.allow_tf32 = True
 torch.backends.cudnn.deterministic = False
 torch.backends.cudnn.benchmark = False
+
+
+def _learn_until_optional_env_stop(
+    runner: OnPolicyRunner | DistillationRunner,
+    num_learning_iterations: int,
+    init_at_random_ep_len: bool,
+    should_stop_training,
+) -> None:
+    """Run RSL-RL learning while allowing a DirectRLEnv to request a clean stop."""
+    if init_at_random_ep_len:
+        runner.env.episode_length_buf = torch.randint_like(
+            runner.env.episode_length_buf,
+            high=int(runner.env.max_episode_length),
+        )
+
+    obs = runner.env.get_observations().to(runner.device)
+    runner.alg.train_mode()
+
+    if runner.is_distributed:
+        print(f"Synchronizing parameters for rank {runner.gpu_global_rank}...")
+        runner.alg.broadcast_parameters()
+
+    runner.logger.init_logging_writer()
+
+    start_it = runner.current_learning_iteration
+    total_it = start_it + num_learning_iterations
+    stopped_by_env = False
+    for it in range(start_it, total_it):
+        start = time.time()
+        with torch.inference_mode():
+            for _ in range(runner.cfg["num_steps_per_env"]):
+                actions = runner.alg.act(obs)
+                obs, rewards, dones, extras = runner.env.step(actions.to(runner.env.device))
+                if runner.cfg.get("check_for_nan", True):
+                    check_nan(obs, rewards, dones)
+                obs, rewards, dones = (obs.to(runner.device), rewards.to(runner.device), dones.to(runner.device))
+                runner.alg.process_env_step(obs, rewards, dones, extras)
+                intrinsic_rewards = runner.alg.intrinsic_rewards if runner.cfg["algorithm"]["rnd_cfg"] else None
+                runner.logger.process_env_step(rewards, dones, extras, intrinsic_rewards)
+                if should_stop_training():
+                    stopped_by_env = True
+                    break
+
+            stop = time.time()
+            collect_time = stop - start
+            start = stop
+            runner.alg.compute_returns(obs)
+
+        loss_dict = runner.alg.update()
+
+        stop = time.time()
+        learn_time = stop - start
+        runner.current_learning_iteration = it
+
+        runner.logger.log(
+            it=it,
+            start_it=start_it,
+            total_it=total_it,
+            collect_time=collect_time,
+            learn_time=learn_time,
+            loss_dict=loss_dict,
+            learning_rate=runner.alg.learning_rate,
+            action_std=runner.alg.get_policy().output_std,
+            rnd_weight=runner.alg.rnd.weight if runner.cfg["algorithm"]["rnd_cfg"] else None,
+        )
+
+        if runner.logger.writer is not None and it % runner.cfg["save_interval"] == 0:
+            runner.save(os.path.join(runner.logger.log_dir, f"model_{it}.pt"))  # type: ignore
+
+        if stopped_by_env:
+            print(f"[INFO] Environment requested training stop at iteration {it}.")
+            break
+
+    if runner.logger.writer is not None:
+        runner.save(os.path.join(runner.logger.log_dir, f"model_{runner.current_learning_iteration}.pt"))  # type: ignore
+        runner.logger.stop_logging_writer()
 
 
 @hydra_task_config(args_cli.task, args_cli.agent)
@@ -176,6 +253,7 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     # convert to single-agent instance if required by the RL algorithm
     if isinstance(env.unwrapped, DirectMARLEnv):
         env = multi_agent_to_single_agent(env)
+    raw_env = env.unwrapped
 
     # save resume path before creating a new log_dir
     if agent_cfg.resume or agent_cfg.algorithm.class_name == "Distillation":
@@ -218,7 +296,16 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     dump_yaml(os.path.join(log_dir, "params", "agent.yaml"), agent_cfg)
 
     # run training
-    runner.learn(num_learning_iterations=agent_cfg.max_iterations, init_at_random_ep_len=True)
+    should_stop_training = getattr(raw_env, "should_stop_training", None)
+    if callable(should_stop_training):
+        _learn_until_optional_env_stop(
+            runner,
+            num_learning_iterations=agent_cfg.max_iterations,
+            init_at_random_ep_len=True,
+            should_stop_training=should_stop_training,
+        )
+    else:
+        runner.learn(num_learning_iterations=agent_cfg.max_iterations, init_at_random_ep_len=True)
 
     print(f"Training time: {round(time.time() - start_time, 2)} seconds")
 
