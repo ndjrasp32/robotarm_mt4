@@ -10,6 +10,8 @@
 
 2026-06-13 17:38 KST 재실행에서는 전체 영역 기록 완료 시 trainer가 정상 종료되도록 코드가 보강됐다. 마지막 영역이 `active`로 남지 않고, runner가 `iteration 1880`에서 checkpoint를 저장한 뒤 종료했다.
 
+2026-06-13 20:12 KST에 같은 조건을 Boss Bot `/chat`에서 다시 실행했고, 결과는 동일하게 `14/25` mastered, `11/25` skipped였다. 이번 실행도 `cuda:0`, `num_envs=128`로 돌았고, 전체 영역 기록 완료 후 `iteration 1880`에서 정상 종료했다.
+
 ## 실행 조건
 
 | 항목 | 값 |
@@ -27,6 +29,20 @@
 | mastery target | `10` successes per region |
 | stall skip limit | `3840 env steps without new success` |
 | tool-tip down offset | `0.035 m` |
+
+### 2026-06-13 20:12 KST rerun
+
+| 항목 | 값 |
+| --- | --- |
+| command | `MT4_MAX_ITERATIONS=3000 MT4_REGION_STALL_STEPS=3840 MT4_SEED=42 ./scripts/train_mirobot_coordinate_stage1_plane_sweep25_skip.sh --device cuda:0` |
+| run dir | `/home/spark-robotics/work/isaac/src/IsaacLab/logs/rsl_rl/mirobot_coordinate_curriculum_direct/2026-06-13_20-12-45_mt4_coordinate_plane_seq25_skipstalled3840_tipdown35mm_128env_3000iter` |
+| session log | `training_logs/session_logs/stage1_sweep25_128env_cuda_tmux_20260613_201240.log` |
+| num envs | `128` |
+| device | `cuda:0` |
+| seed | `42` |
+| stopped iteration | `1880/3000` |
+| training time | `1594.5s` |
+| final checkpoint | `model_1880.pt` |
 
 ## 결과
 
@@ -68,12 +84,16 @@
 
 최종 정상 종료 checkpoint는 `model_1880.pt`다. 다만 이번 선택은 stdout의 mean reward 기준이며, 별도 play/evaluation으로 검증한 best policy는 아니다.
 
+20:12 KST rerun의 최종 정상 종료 checkpoint도 `model_1880.pt`다.
+
+`/home/spark-robotics/work/isaac/src/IsaacLab/logs/rsl_rl/mirobot_coordinate_curriculum_direct/2026-06-13_20-12-45_mt4_coordinate_plane_seq25_skipstalled3840_tipdown35mm_128env_3000iter/model_1880.pt`
+
 ## 코드 확인
 
 - `region_mastery.csv`에서 curriculum complete 이후 active region이 남지 않도록 수정했다.
 - `coordinate_curriculum/plane_localization_region_curriculum_complete` 로그를 추가했다.
 - 모든 영역이 mastered/skipped로 기록되면 trainer가 checkpoint를 저장하고 정상 종료하도록 `train_mirobot.py`에 optional stop hook을 추가했다.
-- 원시 stdout 로그는 크기가 커서 `training_logs/run_stdout/`를 git ignore 처리하고, 요약 분석만 문서로 남긴다.
+- 원시 stdout/session 로그는 크기가 커서 `training_logs/run_stdout/`, `training_logs/session_logs/`를 git ignore 처리하고, 요약 분석만 문서로 남긴다.
 
 ## 판단
 
